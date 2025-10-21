@@ -1,0 +1,6 @@
+@Give_AID_HostAddress = http://localhost:5230
+
+GET {{Give_AID_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
