@@ -1,4 +1,4 @@
-﻿using Give_AID.API.Models;
+﻿using Backend.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Give_AID.API.Helpers
+namespace Backend.Helpers
 {
     public static class JwtHelper
     {

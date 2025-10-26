@@ -1,13 +1,13 @@
-﻿using Give_AID.API.Data;
-using Give_AID.API.DTOs;
-using Give_AID.API.Helpers;
-using Give_AID.API.Models;
+﻿using Backend.Data;
+using Backend.DTOs;
+using Backend.Helpers;
+using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Give_AID.API.Services
+namespace Backend.Services
 {
     public class DonationService
     {

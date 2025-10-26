@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Give_AID.API.Models
+namespace Backend.Models
 {
     public class Invitation
     {

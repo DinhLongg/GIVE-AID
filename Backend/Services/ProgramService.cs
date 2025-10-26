@@ -1,8 +1,8 @@
-﻿using Give_AID.API.Models;
-using Give_AID.API.Data;
+﻿using Backend.Models;
+using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Give_AID.API.Services
+namespace Backend.Services
 {
     public class ProgramService
     {

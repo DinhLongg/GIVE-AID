@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Give_AID.API.DTOs
+namespace Backend.DTOs
 {
     public class DonationDTO
     {
@@ -11,7 +11,7 @@ namespace Give_AID.API.DTOs
         [Required]
         public string? CauseName { get; set; }
 
-        // Dummy card info for validation
+        // Dummy card info for validationx`
         [Required]
         public string? CardNumber { get; set; }
 

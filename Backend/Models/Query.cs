@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Give_AID.API.Models
+namespace Backend.Models
 {
     public class Query
     {
@@ -19,5 +19,6 @@ namespace Give_AID.API.Models
         public string? AdminReply { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? RepliedAt { get; set; }
     }
 }

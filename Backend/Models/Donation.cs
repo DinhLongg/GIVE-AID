@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Give_AID.API.Models
+namespace Backend.Models
 {
     public class Donation
     {

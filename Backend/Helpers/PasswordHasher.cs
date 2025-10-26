@@ -1,17 +1,30 @@
-﻿using BCrypt.Net;
+﻿using System;
 
-namespace Give_AID.API.Helpers
+namespace Backend.Helpers
 {
     public static class PasswordHasher
     {
         public static string Hash(string password)
         {
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password cannot be null or empty", nameof(password));
+
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
-        public static bool Verify(string password, string hash)
+        public static bool Verify(string password, string? hash)
         {
-            return BCrypt.Net.BCrypt.Verify(password, hash);
+            if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(hash))
+                return false;
+
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(password, hash);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

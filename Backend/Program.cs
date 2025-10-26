@@ -1,5 +1,5 @@
-using Give_AID.API.Data;
-using Give_AID.API.Services;
+using Backend.Data;
+using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,17 +19,17 @@ var conn = builder.Configuration.GetConnectionString("DefaultConnection")
 builder.Services.AddDbContext<GiveAidContext>(options => options.UseSqlServer(conn));
 
 // DI: Services
-builder.Services.AddScoped<Give_AID.API.Services.AuthService>();
-builder.Services.AddScoped<Give_AID.API.Services.DonationService>();
-builder.Services.AddScoped<Give_AID.API.Services.NGOService>();
-builder.Services.AddScoped<Give_AID.API.Services.PartnerService>();
-builder.Services.AddScoped<Give_AID.API.Services.ProgramService>();
-builder.Services.AddScoped<Give_AID.API.Services.GalleryService>();
-builder.Services.AddScoped<Give_AID.API.Services.QueryService>();
-builder.Services.AddScoped<Give_AID.API.Services.UserService>();
-builder.Services.AddScoped<Give_AID.API.Services.InvitationService>();
-builder.Services.AddScoped<Give_AID.API.Services.EmailService>();
-builder.Services.AddScoped<Give_AID.API.Services.AboutService>();
+builder.Services.AddScoped<Backend.Services.AuthService>();
+builder.Services.AddScoped<Backend.Services.DonationService>();
+builder.Services.AddScoped<Backend.Services.NGOService>();
+builder.Services.AddScoped<Backend.Services.PartnerService>();
+builder.Services.AddScoped<Backend.Services.ProgramService>();
+builder.Services.AddScoped<Backend.Services.GalleryService>();
+builder.Services.AddScoped<Backend.Services.QueryService>();
+builder.Services.AddScoped<Backend.Services.UserService>();
+builder.Services.AddScoped<Backend.Services.InvitationService>();
+builder.Services.AddScoped<Backend.Services.EmailService>();
+builder.Services.AddScoped<Backend.Services.AboutService>();
 
 // JWT Auth config
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "very_secret_key_change_me_please";

@@ -1,10 +1,10 @@
-﻿using Give_AID.API.DTOs;
-using Give_AID.API.Services;
+﻿using Backend.DTOs;
+using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Give_AID.API.Controllers
+namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

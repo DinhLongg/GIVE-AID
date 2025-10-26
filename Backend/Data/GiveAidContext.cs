@@ -1,7 +1,7 @@
-﻿using Give_AID.API.Models;
+﻿using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Give_AID.API.Data
+namespace Backend.Data
 {
     public class GiveAidContext : DbContext
     {

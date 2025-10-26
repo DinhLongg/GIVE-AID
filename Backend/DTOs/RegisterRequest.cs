@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Give_AID.API.DTOs
+namespace Backend.DTOs
 {
     public class RegisterRequest
     {
