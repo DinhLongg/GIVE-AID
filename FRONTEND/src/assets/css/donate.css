@@ -1,0 +1,384 @@
+/* ===== DONATION PAGE SPECIFIC STYLES ===== */
+
+/* Category Cards */
+.category-card {
+    background: var(--white);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    text-align: center;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    cursor: pointer;
+    height: 100%;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+.category-card.selected {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(29, 78, 216, 0.05));
+}
+
+.category-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--white);
+}
+
+.category-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 1rem;
+}
+
+.category-description {
+    color: var(--gray-600);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.category-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.amount-raised {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: var(--font-size-lg);
+}
+
+.progress-text {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    font-weight: 600;
+}
+
+/* Donation Form */
+.donation-form-container {
+    background: var(--white);
+    border-radius: var(--border-radius-2xl);
+    box-shadow: var(--shadow-xl);
+    padding: 3rem;
+    border: 1px solid var(--gray-200);
+}
+
+.form-header {
+    border-bottom: 2px solid var(--gray-100);
+    padding-bottom: 2rem;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    display: inline-block;
+}
+
+/* Amount Options */
+.amount-options {
+    margin-bottom: 1rem;
+}
+
+.amount-radio {
+    display: none;
+}
+
+.amount-option {
+    display: block;
+    padding: 1.5rem 1rem;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--white);
+}
+
+.amount-option:hover {
+    border-color: var(--primary-color);
+    background: var(--gray-50);
+}
+
+.amount-radio:checked + .amount-option {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(29, 78, 216, 0.1));
+}
+
+.amount-option .amount {
+    display: block;
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.amount-option .currency {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    font-weight: 600;
+}
+
+.custom-amount .input-group-text {
+    background: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.custom-amount .form-control {
+    border-color: var(--gray-300);
+}
+
+.custom-amount .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+/* Payment Methods */
+.payment-methods {
+    background: var(--gray-50);
+    padding: 1rem;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--gray-200);
+}
+
+.payment-methods .form-check-label {
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.payment-methods .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Card Input Styling */
+.card-type-icon {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+    color: var(--gray-600);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+/* Form Labels */
+.form-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+/* Checkboxes */
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-label {
+    color: var(--gray-700);
+    font-weight: 500;
+}
+
+/* Submit Button */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    border: none;
+    padding: 1rem 3rem;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark), #1e40af);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Security Notice */
+.text-muted.small {
+    font-size: var(--font-size-sm);
+}
+
+.text-muted.small i {
+    color: var(--success-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .donation-form-container {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+    }
+    
+    .category-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .amount-option {
+        padding: 1rem 0.5rem;
+    }
+    
+    .amount-option .amount {
+        font-size: var(--font-size-xl);
+    }
+    
+    .section-title {
+        font-size: var(--font-size-lg);
+    }
+    
+    .btn-primary {
+        padding: 0.875rem 2rem;
+        font-size: var(--font-size-base);
+    }
+}
+
+@media (max-width: 576px) {
+    .donation-form-container {
+        padding: 1.5rem 1rem;
+        margin: 0.5rem;
+    }
+    
+    .category-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .amount-option {
+        padding: 0.875rem 0.25rem;
+    }
+    
+    .amount-option .amount {
+        font-size: var(--font-size-lg);
+    }
+}
+
+/* Loading States */
+.btn-primary .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--white);
+    animation: spin 1s linear infinite;
+}
+
+/* Form Validation States */
+.form-control.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.form-control.is-valid {
+    border-color: var(--success-color);
+}
+
+.invalid-feedback {
+    color: var(--danger-color);
+    font-size: var(--font-size-sm);
+    margin-top: 0.25rem;
+}
+
+.valid-feedback {
+    color: var(--success-color);
+    font-size: var(--font-size-sm);
+    margin-top: 0.25rem;
+}
+
+/* Animation for form sections */
+.form-section {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.form-section:nth-child(1) { animation-delay: 0.1s; }
+.form-section:nth-child(2) { animation-delay: 0.2s; }
+.form-section:nth-child(3) { animation-delay: 0.3s; }
+.form-section:nth-child(4) { animation-delay: 0.4s; }
+.form-section:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Success/Error States */
+.form-success {
+    border-color: var(--success-color);
+    background-color: rgba(16, 185, 129, 0.05);
+}
+
+.form-error {
+    border-color: var(--danger-color);
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+/* Progress Bar Animation */
+.progress-bar {
+    transition: width 1.5s ease-in-out;
+}
+
+/* Category Selection Animation */
+.category-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+}
+
+.category-card:hover::before {
+    left: 100%;
+}
+
+/* Custom Scrollbar for Form */
+/* Removed max-height and scroll to display full form */
+
