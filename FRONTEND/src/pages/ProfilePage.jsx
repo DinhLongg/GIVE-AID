@@ -7,7 +7,7 @@ export default function ProfilePage() {
             <div className="col-lg-10">
               <div className="text-center mb-4">
                 <h1 className="fw-bold">Profile</h1>
-                <p className="text-muted">Cập nhật thông tin cá nhân của bạn. (Hiện chưa kết nối API)</p>
+                <p className="text-muted">Update your personal information</p>
               </div>
 
               <div className="card shadow-sm" data-aos="fade-up">
