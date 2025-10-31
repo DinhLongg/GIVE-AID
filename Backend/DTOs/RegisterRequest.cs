@@ -7,6 +7,9 @@ namespace Backend.DTOs
         [Required, MaxLength(120)]
         public string? FullName { get; set; }
 
+        [Required, MaxLength(50), MinLength(3)]
+        public string? Username { get; set; }
+
         [Required, EmailAddress]
         public string? Email { get; set; }
 

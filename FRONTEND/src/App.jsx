@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import DonatePage from './pages/DonatePage';
@@ -31,21 +34,35 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/donate" element={<DonatePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/help" element={<HelpPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/partners" element={<PartnersPage />} />
-          <Route path="/programs" element={<ProgramsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-        </Routes>
-      </Layout>
+      <AuthProvider>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/donate" element={<DonatePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/partners" element={<PartnersPage />} />
+            <Route path="/programs" element={<ProgramsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+          </Routes>
+        </Layout>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

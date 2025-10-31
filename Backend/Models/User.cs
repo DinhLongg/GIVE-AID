@@ -11,6 +11,9 @@ namespace Backend.Models
         [Required, MaxLength(120)]
         public string? FullName { get; set; }
 
+        [Required, MaxLength(50), MinLength(3)]
+        public string? Username { get; set; }
+
         [Required, EmailAddress, MaxLength(200)]
         public string? Email { get; set; }
 

@@ -21,9 +21,14 @@ namespace Backend.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // Example: unique email
+            // Unique email
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
+                .IsUnique();
+
+            // Unique username
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username)
                 .IsUnique();
 
             // seed typical causes

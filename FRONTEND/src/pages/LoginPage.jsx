@@ -1,6 +1,172 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'react-toastify';
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const [formData, setFormData] = useState({
+    usernameOrEmail: '',
+    password: ''
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ''
+      });
+    }
+  };
+
+  const validateField = (name, value) => {
+    let error = '';
+    
+    switch (name) {
+      case 'usernameOrEmail':
+        if (!value || value.trim() === '') {
+          error = 'Username or email is required';
+        }
+        break;
+      case 'password':
+        if (!value) {
+          error = 'Password is required';
+        }
+        break;
+      default:
+        break;
+    }
+    
+    return error;
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const error = validateField(name, value);
+    setErrors({
+      ...errors,
+      [name]: error
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    let isValid = true;
+
+    // Validate all fields
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key]);
+      if (error) {
+        newErrors[key] = error;
+        isValid = false;
+      }
+    });
+
+    setErrors(newErrors);
+
+    // Scroll to first error field
+    if (!isValid) {
+      const firstErrorField = Object.keys(newErrors)[0];
+      const errorElement = document.getElementById(firstErrorField);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        errorElement.focus();
+      }
+    }
+
+    return isValid;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await login(formData.usernameOrEmail.trim(), formData.password);
+
+      // ===== TOAST ALERTS =====
+      if (result.success) {
+        toast.success(
+          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>✅</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px', color: '#065f46' }}>
+                Login Successful!
+              </div>
+              <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                {result.message || 'Welcome back! Redirecting to homepage...'}
+              </div>
+            </div>
+          </div>,
+          {
+            autoClose: 750,
+            onClose: () => {
+              navigate('/');
+            }
+          }
+        );
+        // Redirect after toast closes
+        setTimeout(() => {
+          navigate('/');
+        }, 750);
+      } else {
+        toast.error(
+          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>❌</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px', color: '#991b1b' }}>
+                Login Failed
+              </div>
+              <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                {result.message || 'Invalid username/email or password. Please try again.'}
+              </div>
+            </div>
+          </div>,
+          {
+            autoClose: 750
+          }
+        );
+      }
+    } catch (error) {
+      toast.error(
+        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>⚠️</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px', color: '#991b1b' }}>
+              Connection Error
+            </div>
+            <div style={{ fontSize: '14px', color: '#6b7280' }}>
+              Unable to connect to server. Please check your internet connection and try again.
+            </div>
+          </div>
+        </div>,
+        {
+          autoClose: 750
+        }
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ===== UI RENDERING =====
   return (
     <>
       {/* Hero Section */}
@@ -28,17 +194,31 @@ export default function LoginPage() {
                   <p className="text-muted">Enter your credentials to access your account</p>
                 </div>
                 
-                <form id="loginForm" className="login-form">
+                <form onSubmit={handleSubmit} className="login-form" noValidate>
                   {/* Login Credentials */}
                   <div className="form-section mb-4">
                     <div className="mb-3">
-                      <label htmlFor="username" className="form-label">Username or Email *</label>
+                      <label htmlFor="usernameOrEmail" className="form-label">Username or Email *</label>
                       <div className="input-group">
                         <span className="input-group-text">
                           <i className="fas fa-user"></i>
                         </span>
-                        <input type="text" name="username" id="username" className="form-control" placeholder="Enter your username or email" required />
+                        <input
+                          type="text"
+                          name="usernameOrEmail"
+                          id="usernameOrEmail"
+                          className={`form-control ${errors.usernameOrEmail ? 'is-invalid' : ''}`}
+                          placeholder="Enter your username or email"
+                          value={formData.usernameOrEmail}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
                       </div>
+                      {errors.usernameOrEmail && (
+                        <div className="invalid-feedback d-block">
+                          <i className="fas fa-exclamation-circle me-1"></i>{errors.usernameOrEmail}
+                        </div>
+                      )}
                     </div>
                     
                     <div className="mb-3">
@@ -47,11 +227,29 @@ export default function LoginPage() {
                         <span className="input-group-text">
                           <i className="fas fa-lock"></i>
                         </span>
-                        <input type="password" name="password" id="password" className="form-control" placeholder="Enter your password" required />
-                        <button className="btn btn-outline-secondary" type="button" id="togglePassword">
-                          <i className="fas fa-eye"></i>
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          id="password"
+                          className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                          placeholder="Enter your password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                        <button
+                          className="btn btn-outline-secondary"
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                         </button>
                       </div>
+                      {errors.password && (
+                        <div className="invalid-feedback d-block">
+                          <i className="fas fa-exclamation-circle me-1"></i>{errors.password}
+                        </div>
+                      )}
                     </div>
                     
                     <div className="d-flex justify-content-between align-items-center mb-3">
@@ -61,7 +259,7 @@ export default function LoginPage() {
                           Remember me
                         </label>
                       </div>
-                      <a href="#" className="text-primary text-decoration-none" id="forgotPasswordLink">
+                      <a href="#" className="text-primary text-decoration-none">
                         Forgot password?
                       </a>
                     </div>
@@ -69,8 +267,21 @@ export default function LoginPage() {
                   
                   {/* Submit Button */}
                   <div className="form-section text-center mb-4">
-                    <button type="submit" className="btn btn-primary btn-lg w-100">
-                      <i className="fas fa-sign-in-alt me-2"></i>Sign In
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-lg w-100"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          Signing In...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-sign-in-alt me-2"></i>Sign In
+                        </>
+                      )}
                     </button>
                   </div>
                   
@@ -81,12 +292,12 @@ export default function LoginPage() {
                     </div>
                     <div className="row">
                       <div className="col-6">
-                        <button type="button" className="btn btn-outline-danger w-100" id="googleLogin">
+                        <button type="button" className="btn btn-outline-danger w-100">
                           <i className="fab fa-google me-2"></i>Google
                         </button>
                       </div>
                       <div className="col-6">
-                        <button type="button" className="btn btn-outline-primary w-100" id="facebookLogin">
+                        <button type="button" className="btn btn-outline-primary w-100">
                           <i className="fab fa-facebook-f me-2"></i>Facebook
                         </button>
                       </div>
