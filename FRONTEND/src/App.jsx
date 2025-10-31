@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/layout/Layout';
+import ScrollToTop from './components/ScrollToTop';
 import HomePage from './pages/HomePage';
 import DonatePage from './pages/DonatePage';
 import AboutPage from './pages/AboutPage';
@@ -22,10 +23,10 @@ function App() {
     // Initialize AOS when component mounts
     import('aos').then(AOS => {
       AOS.init({
-        duration: 1000,
+        duration: 700,
         easing: 'ease-in-out',
         once: true,
-        offset: 100
+        offset: 50
       });
     });
 
@@ -36,6 +37,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ScrollToTop />
         <Layout>
           <Routes>
             <Route path="/" element={<HomePage />} />

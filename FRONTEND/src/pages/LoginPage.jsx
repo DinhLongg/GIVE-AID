@@ -105,15 +105,10 @@ export default function LoginPage() {
       // ===== TOAST ALERTS =====
       if (result.success) {
         toast.success(result.message || 'Login successful! Welcome back!', {
-          autoClose: 750,
-          onClose: () => {
-            navigate('/');
-          }
+          autoClose: 500
         });
-        // Redirect after toast closes
-        setTimeout(() => {
-          navigate('/');
-        }, 750);
+        // Redirect immediately (no delay needed)
+        navigate('/');
       } else {
         const errorMessage = result.message || 'Invalid username/email or password. Please try again.';
         const isEmailNotVerified = errorMessage.toLowerCase().includes('verify') || 
@@ -132,17 +127,18 @@ export default function LoginPage() {
         
         setErrors(newErrors);
         
-        // Scroll to first error field
-        setTimeout(() => {
-          const firstErrorField = Object.keys(newErrors).find(key => newErrors[key]);
-          if (firstErrorField) {
+        // Scroll to first error field immediately
+        const firstErrorField = Object.keys(newErrors).find(key => newErrors[key]);
+        if (firstErrorField) {
+          // Use requestAnimationFrame for smooth scroll without delay
+          requestAnimationFrame(() => {
             const element = document.getElementById(firstErrorField);
             if (element) {
               element.scrollIntoView({ behavior: 'smooth', block: 'center' });
               element.focus();
             }
-          }
-        }, 100);
+          });
+        }
         
         // Show toast with inline error reference
         const toastMessage = isInvalidCredentials && !isEmailNotVerified 
@@ -155,12 +151,10 @@ export default function LoginPage() {
 
         // Handle resend verification email separately if needed
         if (isEmailNotVerified) {
-          // Show info toast with link to verify email page
-          setTimeout(() => {
-            toast.info('Please verify your email. Go to Verify Email page to resend verification email.', {
-              autoClose: 5000
-            });
-          }, 1000);
+          // Show info toast immediately
+          toast.info('Please verify your email. Go to Verify Email page to resend verification email.', {
+            autoClose: 5000
+          });
         }
       }
     } catch (error) {

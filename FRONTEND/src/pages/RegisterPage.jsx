@@ -180,23 +180,16 @@ export default function RegisterPage() {
         // Check if token exists - if not, user needs to verify email
         if (!result.token) {
           toast.success(result.message || 'Registration successful! Please check your email to verify your account.', {
-            autoClose: 5000
+            autoClose: 3000
           });
-          // Redirect to verify-email page or stay on register page with message
-          setTimeout(() => {
-            navigate('/verify-email');
-          }, 2000);
+          // Redirect immediately (no delay needed)
+          navigate('/verify-email');
         } else {
           // Old behavior - token returned (shouldn't happen with email verification)
           toast.success(result.message || 'Registration successful! Redirecting to login...', {
-            autoClose: 750,
-            onClose: () => {
-              navigate('/login');
-            }
+            autoClose: 500
           });
-          setTimeout(() => {
-            navigate('/login');
-          }, 750);
+          navigate('/login');
         }
       } else {
         // Parse error message and set inline errors
@@ -227,17 +220,18 @@ export default function RegisterPage() {
 
         setErrors(newErrors);
 
-        // Scroll to first error field
-        setTimeout(() => {
-          const firstErrorField = Object.keys(newErrors).find(key => newErrors[key]);
-          if (firstErrorField) {
+        // Scroll to first error field immediately
+        const firstErrorField = Object.keys(newErrors).find(key => newErrors[key]);
+        if (firstErrorField) {
+          // Use requestAnimationFrame for smooth scroll without delay
+          requestAnimationFrame(() => {
             const element = document.getElementById(firstErrorField);
             if (element) {
               element.scrollIntoView({ behavior: 'smooth', block: 'center' });
               element.focus();
             }
-          }
-        }, 100);
+          });
+        }
 
         // Show toast if there are field-specific errors to draw attention
         if (newErrors.email || newErrors.username) {
