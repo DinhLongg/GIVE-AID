@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+﻿//thêm mới 30/10
+>>>>>>> be9c56d588c6cb1e1b22d0690657bdc5e34a11b8
 using Backend.DTOs;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +15,7 @@ namespace Backend.Controllers
     [Authorize]
     public class ProfileController : ControllerBase
     {
+<<<<<<< HEAD
         private readonly UserService _userService;
 
         public ProfileController(UserService userService)
@@ -107,3 +112,30 @@ namespace Backend.Controllers
     }
 }
 
+=======
+        private readonly ProfileService _profileService;
+
+        public ProfileController(ProfileService profileService)
+        {
+            _profileService = profileService;
+        }
+
+        private int GetUserId() =>
+            int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        [HttpGet]
+        public async Task<IActionResult> GetProfile()
+        {
+            var profile = await _profileService.GetProfileAsync(GetUserId());
+            return Ok(profile);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateRequest req)
+        {
+            await _profileService.UpdateProfileAsync(GetUserId(), req);
+            return Ok(new { message = "Profile updated successfully" });
+        }
+    }
+}
+>>>>>>> be9c56d588c6cb1e1b22d0690657bdc5e34a11b8
