@@ -17,8 +17,7 @@ namespace Backend.Data
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<Cause> Causes { get; set; }
         public DbSet<AboutSection> AboutSections { get; set; }
-        public DbSet<UserProfile> UserProfiles { get; set; } // mới thêm
-
+        public DbSet<UserProfile> UserProfiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

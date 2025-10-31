@@ -30,8 +30,7 @@ builder.Services.AddScoped<Backend.Services.UserService>();
 builder.Services.AddScoped<Backend.Services.InvitationService>();
 builder.Services.AddScoped<Backend.Services.EmailService>();
 builder.Services.AddScoped<Backend.Services.AboutService>();
-builder.Services.AddScoped<ProfileService>();//thêm mới 30/10
-
+builder.Services.AddScoped<Backend.Services.ProfileService>();
 
 // JWT Auth config
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "very_secret_key_change_me_please";

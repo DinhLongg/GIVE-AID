@@ -31,11 +31,7 @@ namespace Backend.Services
                 Gender = profile.Gender,
                 StreetAddress = profile.StreetAddress,
                 City = profile.City,
-                Country = profile.Country,
-                Profession = profile.Profession,
-                Organization = profile.Organization,
-                WorkPhone = profile.WorkPhone,
-                WorkEmail = profile.WorkEmail
+                Country = profile.Country
             };
         }
 
@@ -57,10 +53,6 @@ namespace Backend.Services
             profile.StreetAddress = req.StreetAddress;
             profile.City = req.City;
             profile.Country = req.Country;
-            profile.Profession = req.Profession;
-            profile.Organization = req.Organization;
-            profile.WorkPhone = req.WorkPhone;
-            profile.WorkEmail = req.WorkEmail;
 
             await _context.SaveChangesAsync();
             return true;

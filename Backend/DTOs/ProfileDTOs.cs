@@ -14,11 +14,6 @@ namespace Backend.DTOs
         public string? StreetAddress { get; set; }
         public string? City { get; set; }
         public string? Country { get; set; }
-
-        public string? Profession { get; set; }
-        public string? Organization { get; set; }
-        public string? WorkPhone { get; set; }
-        public string? WorkEmail { get; set; }
     }
 
     public class ProfileUpdateRequest
@@ -31,9 +26,17 @@ namespace Backend.DTOs
         public string? StreetAddress { get; set; }
         public string? City { get; set; }
         public string? Country { get; set; }
-        public string? Profession { get; set; }
-        public string? Organization { get; set; }
-        public string? WorkPhone { get; set; }
-        public string? WorkEmail { get; set; }
+    }
+
+    public class ChangePasswordRequest
+    {
+        [Required]
+        public string CurrentPassword { get; set; } = "";
+
+        [Required, MinLength(6)]
+        public string NewPassword { get; set; } = "";
+
+        [Required]
+        public string ConfirmPassword { get; set; } = "";
     }
 }

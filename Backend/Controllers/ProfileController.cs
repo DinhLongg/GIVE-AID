@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-﻿//thêm mới 30/10
->>>>>>> be9c56d588c6cb1e1b22d0690657bdc5e34a11b8
 using Backend.DTOs;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -15,127 +11,91 @@ namespace Backend.Controllers
     [Authorize]
     public class ProfileController : ControllerBase
     {
-<<<<<<< HEAD
-        private readonly UserService _userService;
+        private readonly ProfileService _profileService;
+        private readonly AuthService _authService;
 
-        public ProfileController(UserService userService)
+        public ProfileController(ProfileService profileService, AuthService authService)
         {
-            _userService = userService;
+            _profileService = profileService;
+            _authService = authService;
         }
 
         /// <summary>
-        /// Get current user's profile information
+        /// Get current user's profile
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetProfile()
         {
             // Get user ID from JWT token
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                return Unauthorized(new { message = "Invalid token" });
-
-            var user = await _userService.GetByIdAsync(userId);
-            if (user == null)
-                return NotFound(new { message = "User not found" });
-
-            var profile = new ProfileResponse
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {
-                Id = user.Id,
-                FullName = user.FullName,
-                Username = user.Username,
-                Email = user.Email,
-                Phone = user.Phone,
-                Address = user.Address,
-                Role = user.Role,
-                CreatedAt = user.CreatedAt
-            };
+                return Unauthorized();
+            }
+
+            var profile = await _profileService.GetProfileAsync(userId);
+            // Return empty profile if not found (frontend will handle it)
+            if (profile == null)
+            {
+                return Ok(null);
+            }
 
             return Ok(profile);
         }
 
         /// <summary>
-        /// Update user profile information (FullName, Phone, Address)
+        /// Update current user's profile
         /// </summary>
         [HttpPut]
-        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+        public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateRequest request)
         {
             if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
+            }
 
             // Get user ID from JWT token
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                return Unauthorized(new { message = "Invalid token" });
-
-            var result = await _userService.UpdateProfileAsync(userId, request);
-            
-            if (!result.success)
-                return BadRequest(new { message = result.message });
-
-            // Return updated profile
-            var profile = new ProfileResponse
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {
-                Id = result.user!.Id,
-                FullName = result.user.FullName,
-                Username = result.user.Username,
-                Email = result.user.Email,
-                Phone = result.user.Phone,
-                Address = result.user.Address,
-                Role = result.user.Role,
-                CreatedAt = result.user.CreatedAt
-            };
+                return Unauthorized();
+            }
 
-            return Ok(new { message = result.message, profile });
+            var success = await _profileService.UpdateProfileAsync(userId, request);
+            if (!success)
+            {
+                return BadRequest(new { message = "Failed to update profile" });
+            }
+
+            return Ok(new { message = "Profile updated successfully" });
         }
 
         /// <summary>
-        /// Change user password
+        /// Change password for current user
         /// </summary>
-        [HttpPut("password")]
+        [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
+            }
 
             // Get user ID from JWT token
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                return Unauthorized(new { message = "Invalid token" });
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized();
+            }
 
-            var result = await _userService.ChangePasswordAsync(userId, request);
-            
+            var result = await _authService.ChangePasswordAsync(userId, request);
             if (!result.success)
+            {
                 return BadRequest(new { message = result.message });
+            }
 
             return Ok(new { message = result.message });
         }
     }
 }
 
-=======
-        private readonly ProfileService _profileService;
-
-        public ProfileController(ProfileService profileService)
-        {
-            _profileService = profileService;
-        }
-
-        private int GetUserId() =>
-            int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-        [HttpGet]
-        public async Task<IActionResult> GetProfile()
-        {
-            var profile = await _profileService.GetProfileAsync(GetUserId());
-            return Ok(profile);
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateRequest req)
-        {
-            await _profileService.UpdateProfileAsync(GetUserId(), req);
-            return Ok(new { message = "Profile updated successfully" });
-        }
-    }
-}
->>>>>>> be9c56d588c6cb1e1b22d0690657bdc5e34a11b8

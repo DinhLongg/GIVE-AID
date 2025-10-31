@@ -11,11 +11,12 @@ namespace Backend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<DateTime>(
-                name: "RepliedAt",
-                table: "Queries",
-                type: "datetime2",
-                nullable: true);
+            // Skip RepliedAt - column already exists in database
+            // migrationBuilder.AddColumn<DateTime>(
+            //     name: "RepliedAt",
+            //     table: "Queries",
+            //     type: "datetime2",
+            //     nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "UserProfiles",
@@ -60,9 +61,10 @@ namespace Backend.Migrations
             migrationBuilder.DropTable(
                 name: "UserProfiles");
 
-            migrationBuilder.DropColumn(
-                name: "RepliedAt",
-                table: "Queries");
+            // Skip RepliedAt - don't drop column
+            // migrationBuilder.DropColumn(
+            //     name: "RepliedAt",
+            //     table: "Queries");
         }
     }
 }

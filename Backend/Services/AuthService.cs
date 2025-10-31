@@ -1,5 +1,4 @@
-﻿//27/10
-using Backend.Data;
+﻿using Backend.Data;
 using Backend.DTOs;
 using Backend.Helpers;
 using Backend.Models;
@@ -81,6 +80,36 @@ namespace Backend.Services
             var token = JwtHelper.GenerateToken(user, _config);
 
             return (true, "Login successful", token);
+        }
+
+        /// <summary>
+        /// Change password for user
+        /// </summary>
+        public async Task<(bool success, string message)> ChangePasswordAsync(int userId, ChangePasswordRequest req)
+        {
+            // Find user
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return (false, "User not found");
+
+            // Verify current password
+            var valid = PasswordHasher.Verify(req.CurrentPassword ?? string.Empty, user.PasswordHash);
+            if (!valid)
+                return (false, "Current password is incorrect");
+
+            // Check new password and confirm password match
+            if (req.NewPassword != req.ConfirmPassword)
+                return (false, "New password and confirm password do not match");
+
+            // Check minimum length
+            if (string.IsNullOrWhiteSpace(req.NewPassword) || req.NewPassword.Length < 6)
+                return (false, "New password must be at least 6 characters");
+
+            // Update password
+            user.PasswordHash = PasswordHasher.Hash(req.NewPassword);
+            await _context.SaveChangesAsync();
+
+            return (true, "Password changed successfully");
         }
     }
 }

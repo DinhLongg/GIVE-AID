@@ -27,7 +27,6 @@ namespace Backend.Helpers
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.FullName ?? string.Empty),
-                new Claim("username", user.Username ?? string.Empty),
                 new Claim(ClaimTypes.Role, user.Role ?? "User")
             };
 
