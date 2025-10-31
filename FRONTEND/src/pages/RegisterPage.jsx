@@ -177,64 +177,79 @@ export default function RegisterPage() {
 
       // ===== TOAST ALERTS =====
       if (result.success) {
-        toast.success(
-          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>🎉</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px', color: '#065f46' }}>
-                Registration Successful!
-              </div>
-              <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                {result.message || 'Your account has been created successfully. Redirecting to login...'}
-              </div>
-            </div>
-          </div>,
-          {
+        // Check if token exists - if not, user needs to verify email
+        if (!result.token) {
+          toast.success(result.message || 'Registration successful! Please check your email to verify your account.', {
+            autoClose: 5000
+          });
+          // Redirect to verify-email page or stay on register page with message
+          setTimeout(() => {
+            navigate('/verify-email');
+          }, 2000);
+        } else {
+          // Old behavior - token returned (shouldn't happen with email verification)
+          toast.success(result.message || 'Registration successful! Redirecting to login...', {
             autoClose: 750,
             onClose: () => {
               navigate('/login');
             }
-          }
-        );
-        // Redirect after toast closes
-        setTimeout(() => {
-          navigate('/login');
-        }, 750);
+          });
+          setTimeout(() => {
+            navigate('/login');
+          }, 750);
+        }
       } else {
-        toast.error(
-          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>❌</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px', color: '#991b1b' }}>
-                Registration Failed
-              </div>
-              <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                {result.message || 'Something went wrong. Please try again.'}
-              </div>
-            </div>
-          </div>,
-          {
-            autoClose: 750
+        // Parse error message and set inline errors
+        const errorMessage = result.message || 'Something went wrong. Please try again.';
+        const newErrors = { ...errors };
+
+        // Check for specific field errors
+        if (errorMessage.toLowerCase().includes('email already exists') || 
+            errorMessage.toLowerCase().includes('email exists')) {
+          newErrors.email = 'Email already exists';
+        } else if (errorMessage.toLowerCase().includes('username already exists') || 
+                   errorMessage.toLowerCase().includes('username exists')) {
+          newErrors.username = 'Username already exists';
+        } else if (errorMessage.toLowerCase().includes('email') && 
+                   errorMessage.toLowerCase().includes('invalid')) {
+          newErrors.email = 'Please enter a valid email address';
+        } else if (errorMessage.toLowerCase().includes('username') && 
+                   errorMessage.toLowerCase().includes('invalid')) {
+          newErrors.username = 'Invalid username format';
+        } else if (errorMessage.toLowerCase().includes('password')) {
+          newErrors.password = 'Password validation failed';
+        } else {
+          // Generic error - show toast for non-field specific errors
+          toast.error(errorMessage, {
+            autoClose: 4000
+          });
+        }
+
+        setErrors(newErrors);
+
+        // Scroll to first error field
+        setTimeout(() => {
+          const firstErrorField = Object.keys(newErrors).find(key => newErrors[key]);
+          if (firstErrorField) {
+            const element = document.getElementById(firstErrorField);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              element.focus();
+            }
           }
-        );
+        }, 100);
+
+        // Show toast if there are field-specific errors to draw attention
+        if (newErrors.email || newErrors.username) {
+          toast.error('Please check the highlighted fields below', {
+            autoClose: 3000
+          });
+        }
       }
     } catch (error) {
-      toast.error(
-        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-          <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>⚠️</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px', color: '#991b1b' }}>
-              Connection Error
-            </div>
-            <div style={{ fontSize: '14px', color: '#6b7280' }}>
-              Unable to connect to server. Please check your internet connection and try again.
-            </div>
-          </div>
-        </div>,
-        {
-          autoClose: 750
-        }
-      );
+      toast.error('Connection error: Unable to connect to server. Please check your internet connection and try again.', {
+        autoClose: 4000
+      });
     } finally {
       // Bước 6: Luôn chạy dù thành công hay thất bại
       // Tắt loading state

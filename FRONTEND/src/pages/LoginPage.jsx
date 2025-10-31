@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { resendVerificationEmail } from '../services/authServices';
 import { toast } from 'react-toastify';
 
 export default function LoginPage() {
@@ -103,64 +104,69 @@ export default function LoginPage() {
 
       // ===== TOAST ALERTS =====
       if (result.success) {
-        toast.success(
-          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>✅</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px', color: '#065f46' }}>
-                Login Successful!
-              </div>
-              <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                {result.message || 'Welcome back! Redirecting to homepage...'}
-              </div>
-            </div>
-          </div>,
-          {
-            autoClose: 750,
-            onClose: () => {
-              navigate('/');
-            }
+        toast.success(result.message || 'Login successful! Welcome back!', {
+          autoClose: 750,
+          onClose: () => {
+            navigate('/');
           }
-        );
+        });
         // Redirect after toast closes
         setTimeout(() => {
           navigate('/');
         }, 750);
       } else {
-        toast.error(
-          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>❌</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px', color: '#991b1b' }}>
-                Login Failed
-              </div>
-              <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                {result.message || 'Invalid username/email or password. Please try again.'}
-              </div>
-            </div>
-          </div>,
-          {
-            autoClose: 750
+        const errorMessage = result.message || 'Invalid username/email or password. Please try again.';
+        const isEmailNotVerified = errorMessage.toLowerCase().includes('verify') || 
+                                   (errorMessage.toLowerCase().includes('email') && errorMessage.toLowerCase().includes('verify'));
+        const isInvalidCredentials = errorMessage.toLowerCase().includes('invalid') || 
+                                     errorMessage.toLowerCase().includes('password');
+        
+        // Set inline errors for username/email or password fields
+        const newErrors = { ...errors };
+        
+        if (isInvalidCredentials && !isEmailNotVerified) {
+          // Invalid credentials - show on both fields
+          newErrors.usernameOrEmail = 'Invalid username/email or password';
+          newErrors.password = 'Invalid username/email or password';
+        }
+        
+        setErrors(newErrors);
+        
+        // Scroll to first error field
+        setTimeout(() => {
+          const firstErrorField = Object.keys(newErrors).find(key => newErrors[key]);
+          if (firstErrorField) {
+            const element = document.getElementById(firstErrorField);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              element.focus();
+            }
           }
-        );
+        }, 100);
+        
+        // Show toast with inline error reference
+        const toastMessage = isInvalidCredentials && !isEmailNotVerified 
+          ? 'Please check the highlighted fields below' 
+          : errorMessage;
+        
+        toast.error(toastMessage, {
+          autoClose: isEmailNotVerified ? 6000 : 3000
+        });
+
+        // Handle resend verification email separately if needed
+        if (isEmailNotVerified) {
+          // Show info toast with link to verify email page
+          setTimeout(() => {
+            toast.info('Please verify your email. Go to Verify Email page to resend verification email.', {
+              autoClose: 5000
+            });
+          }, 1000);
+        }
       }
     } catch (error) {
-      toast.error(
-        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-          <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>⚠️</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px', color: '#991b1b' }}>
-              Connection Error
-            </div>
-            <div style={{ fontSize: '14px', color: '#6b7280' }}>
-              Unable to connect to server. Please check your internet connection and try again.
-            </div>
-          </div>
-        </div>,
-        {
-          autoClose: 750
-        }
-      );
+      toast.error('Connection error: Unable to connect to server. Please check your internet connection and try again.', {
+        autoClose: 4000
+      });
     } finally {
       setIsLoading(false);
     }

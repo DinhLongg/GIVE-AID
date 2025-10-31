@@ -35,6 +35,15 @@ namespace Backend.Services
             if (string.IsNullOrWhiteSpace(smtpHost) || string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
             {
                 Console.WriteLine("[Warning] Email skipped: missing configuration or recipient.");
+                Console.WriteLine($"[Debug] SMTP Config - Host: '{smtpHost}', User: '{smtpUser}', From: '{from}', To: '{to}'");
+                return false;
+            }
+
+            // Check if password is configured
+            if (string.IsNullOrWhiteSpace(smtpPass))
+            {
+                Console.WriteLine("[Warning] Email skipped: SMTP password is not configured.");
+                Console.WriteLine("[Error] Please set 'Smtp:Pass' in appsettings.json with your Gmail App Password.");
                 return false;
             }
 
@@ -59,7 +68,12 @@ namespace Backend.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Error] Failed to send email: {ex.Message}");
+                Console.WriteLine($"[Error] Failed to send email to {to}: {ex.Message}");
+                Console.WriteLine($"[Error] Exception type: {ex.GetType().Name}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[Error] Inner exception: {ex.InnerException.Message}");
+                }
                 return false;
             }
         }

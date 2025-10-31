@@ -12,6 +12,7 @@ import GalleryPage from './pages/GalleryPage';
 import HelpPage from './pages/HelpPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import PartnersPage from './pages/PartnersPage';
 import ProgramsPage from './pages/ProgramsPage';
 import ProfilePage from './pages/ProfilePage';
@@ -45,6 +46,7 @@ function App() {
             <Route path="/help" element={<HelpPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/partners" element={<PartnersPage />} />
             <Route path="/programs" element={<ProgramsPage />} />
             <Route path="/profile" element={<ProfilePage />} />

@@ -29,6 +29,11 @@ namespace Backend.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // Email Verification
+        public bool EmailVerified { get; set; } = false;
+        public string? EmailVerificationToken { get; set; }
+        public DateTime? EmailVerificationTokenExpiry { get; set; }
+
         public ICollection<Donation>? Donations { get; set; }
         public ICollection<Invitation>? SentInvitations { get; set; }
     }

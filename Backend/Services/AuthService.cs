@@ -4,6 +4,8 @@ using Backend.Helpers;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Security.Cryptography;
+using System;
 
 namespace Backend.Services
 {
@@ -11,11 +13,13 @@ namespace Backend.Services
     {
         private readonly GiveAidContext _context;
         private readonly IConfiguration _config;
+        private readonly EmailService _emailService;
 
-        public AuthService(GiveAidContext context, IConfiguration config)
+        public AuthService(GiveAidContext context, IConfiguration config, EmailService emailService)
         {
             _context = context;
             _config = config;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -46,13 +50,200 @@ namespace Backend.Services
                 CreatedAt = DateTime.UtcNow
             };
 
+            // Generate email verification token
+            var verificationToken = GenerateEmailVerificationToken();
+            user.EmailVerificationToken = PasswordHasher.Hash(verificationToken); // Hash token before saving
+            user.EmailVerificationTokenExpiry = DateTime.UtcNow.AddHours(24); // Token expires in 24 hours
+            user.EmailVerified = false;
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Generate JWT token for new user
-            var token = JwtHelper.GenerateToken(user, _config);
+            // Send verification email
+            var frontendUrl = _config["FrontendUrl"] ?? "http://localhost:5173";
+            var verificationLink = $"{frontendUrl}/verify-email?token={verificationToken}";
+            var emailBody = EmailTemplate.VerificationEmailTemplate(user.FullName, verificationLink, verificationToken);
+            
+            try
+            {
+                var emailSent = await _emailService.SendEmailAsync(
+                    user.Email,
+                    "Verify Your Give-AID Account",
+                    emailBody
+                );
 
-            return (true, "Registration successful", token);
+                if (!emailSent)
+                {
+                    // Email sending failed - log but don't fail registration
+                    Console.WriteLine($"[Warning] Failed to send verification email to {user.Email}. User was created but email verification is pending.");
+                    return (true, $"Registration successful! However, we couldn't send verification email. Please use 'Resend Verification' feature or contact support. User ID: {user.Id}", null);
+                }
+
+                Console.WriteLine($"[Info] Verification email sent successfully to {user.Email}");
+            }
+            catch (Exception ex)
+            {
+                // Log exception but don't fail registration
+                Console.WriteLine($"[Error] Exception while sending verification email to {user.Email}: {ex.Message}");
+                Console.WriteLine($"[Error] Stack trace: {ex.StackTrace}");
+                return (true, $"Registration successful! However, we couldn't send verification email. Please use 'Resend Verification' feature. User ID: {user.Id}", null);
+            }
+
+            // Don't return JWT token yet - user must verify email first
+            return (true, "Registration successful! Please check your email to verify your account.", null);
+        }
+
+        /// <summary>
+        /// Generate a random email verification token
+        /// </summary>
+        private string GenerateEmailVerificationToken()
+        {
+            // Generate a secure random token (32 characters)
+            var bytes = new byte[24];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(bytes);
+            }
+            return Convert.ToBase64String(bytes)
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .Replace("=", "")
+                .Substring(0, 32);
+        }
+
+        /// <summary>
+        /// Verify email with token
+        /// </summary>
+        public async Task<(bool success, string message)> VerifyEmailAsync(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return (false, "Invalid verification token");
+
+            // Log token for debugging
+            Console.WriteLine($"[Debug] VerifyEmailAsync - Token received: '{token}' (Length: {token?.Length})");
+
+            // URL decode token in case it was encoded (try-catch to handle already decoded tokens)
+            try
+            {
+                var decoded = Uri.UnescapeDataString(token);
+                if (decoded != token)
+                {
+                    Console.WriteLine($"[Debug] Token was URL encoded, decoded to: '{decoded}'");
+                    token = decoded;
+                }
+            }
+            catch
+            {
+                Console.WriteLine($"[Debug] Token appears to be already decoded or invalid format");
+            }
+
+            // Find user with matching token (hash comparison)
+            // We need to check all users because token is hashed
+            var users = await _context.Users
+                .Where(u => u.EmailVerificationToken != null && !u.EmailVerified)
+                .ToListAsync();
+            
+            Console.WriteLine($"[Debug] Found {users.Count} users with unverified email tokens");
+
+            User? user = null;
+
+            // Try to find user by verifying token hash
+            foreach (var u in users)
+            {
+                try
+                {
+                    // BCrypt verify will check if token matches the hash
+                    var isValid = PasswordHasher.Verify(token, u.EmailVerificationToken);
+                    Console.WriteLine($"[Debug] Checking user {u.Id} ({u.Email}) - Token match: {isValid}");
+                    
+                    if (isValid)
+                    {
+                        user = u;
+                        Console.WriteLine($"[Info] Found matching user: {u.Id} ({u.Email})");
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Debug] Error verifying token for user {u.Id}: {ex.Message}");
+                    // Continue to next user
+                }
+            }
+
+            if (user == null)
+            {
+                Console.WriteLine($"[Warning] No user found matching token: '{token}'");
+                return (false, "Invalid or expired verification token");
+            }
+
+            // Check if token has expired
+            if (user.EmailVerificationTokenExpiry.HasValue && 
+                user.EmailVerificationTokenExpiry.Value < DateTime.UtcNow)
+                return (false, "Verification token has expired. Please request a new verification email.");
+
+            // Check if already verified
+            if (user.EmailVerified)
+                return (false, "Email is already verified");
+
+            // Verify email
+            user.EmailVerified = true;
+            user.EmailVerificationToken = null;
+            user.EmailVerificationTokenExpiry = null;
+
+            await _context.SaveChangesAsync();
+
+            return (true, "Email verified successfully! You can now login.");
+        }
+
+        /// <summary>
+        /// Resend verification email
+        /// </summary>
+        public async Task<(bool success, string message)> ResendVerificationEmailAsync(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            
+            if (user == null)
+                // Don't reveal if email exists (security)
+                return (true, "If email exists, verification email has been sent.");
+
+            if (user.EmailVerified)
+                return (false, "Email is already verified");
+
+            // Generate new verification token
+            var verificationToken = GenerateEmailVerificationToken();
+            user.EmailVerificationToken = PasswordHasher.Hash(verificationToken);
+            user.EmailVerificationTokenExpiry = DateTime.UtcNow.AddHours(24);
+
+            await _context.SaveChangesAsync();
+
+            // Send verification email
+            var frontendUrl = _config["FrontendUrl"] ?? "http://localhost:5173";
+            var verificationLink = $"{frontendUrl}/verify-email?token={verificationToken}";
+            var emailBody = EmailTemplate.VerificationEmailTemplate(user.FullName, verificationLink, verificationToken);
+            
+            try
+            {
+                var emailSent = await _emailService.SendEmailAsync(
+                    user.Email,
+                    "Verify Your Give-AID Account",
+                    emailBody
+                );
+
+                if (!emailSent)
+                {
+                    Console.WriteLine($"[Warning] Failed to resend verification email to {user.Email}");
+                    return (false, "Failed to send verification email. Please check your SMTP configuration in appsettings.json");
+                }
+
+                Console.WriteLine($"[Info] Resend verification email sent successfully to {user.Email}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Error] Exception while resending verification email to {user.Email}: {ex.Message}");
+                return (false, $"Failed to send verification email: {ex.Message}. Please check your SMTP configuration.");
+            }
+
+            return (true, "Verification email has been sent. Please check your inbox.");
         }
 
         /// <summary>
@@ -75,6 +266,10 @@ namespace Backend.Services
             var valid = PasswordHasher.Verify(req.Password ?? string.Empty, user.PasswordHash);
             if (!valid)
                 return (false, "Invalid username/email or password", null);
+
+            // Check if email is verified
+            if (!user.EmailVerified)
+                return (false, "Please verify your email before logging in. Check your inbox for verification link or request a new one.", null);
 
             // Generate JWT token
             var token = JwtHelper.GenerateToken(user, _config);
