@@ -1,24 +1,24 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿//31/10
+using System.ComponentModel.DataAnnotations;
 namespace Backend.DTOs
 {
     public class DonationDTO
     {
-        public int? UserId { get; set; }  // can be null for guest
-        [Required]
         public decimal Amount { get; set; }
+        public string Cause { get; set; } = string.Empty;
 
-        [Required]
-        public string? CauseName { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string? Address { get; set; }
+        public int? UserId { get; set; }
 
-        // Dummy card info for validationx`
-        [Required]
-        public string? CardNumber { get; set; }
+        public string PaymentMethod { get; set; } = "Card";
+        public string CardNumber { get; set; } = string.Empty;
+        public string Expiry { get; set; } = string.Empty;
+        public string CVV { get; set; } = string.Empty;
 
-        [Required]
-        public string? CardExpiry { get; set; } // MM/YY
-
-        [Required]
-        public string? CardCvv { get; set; }
+        public bool Anonymous { get; set; }
+        public bool Newsletter { get; set; }
     }
 }
