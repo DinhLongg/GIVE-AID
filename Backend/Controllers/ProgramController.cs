@@ -1,4 +1,5 @@
 ﻿
+using Backend.DTOs;
 using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -37,6 +38,12 @@ namespace Backend.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             if (!await _service.DeleteAsync(id)) return NotFound();
+            return Ok();
+        }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(ProgramRegistrationRequest req)
+        {
+            // TODO: Gọi ProgramService.RegisterUserToProgram(req)
             return Ok();
         }
     }

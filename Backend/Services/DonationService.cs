@@ -22,8 +22,8 @@ namespace Backend.Services
         {
             // Validate payment fields
             if (!PaymentValidator.ValidateCardNumber(dto.CardNumber)
-                || !PaymentValidator.ValidateExpiry(dto.CardExpiry)
-                || !PaymentValidator.ValidateCvv(dto.CardCvv))
+                || !PaymentValidator.ValidateExpiry(dto.Expiry)
+                || !PaymentValidator.ValidateCvv(dto.CVV))
             {
                 return null;
             }
@@ -31,11 +31,16 @@ namespace Backend.Services
             var donation = new Donation
             {
                 Amount = dto.Amount,
-                CauseName = dto.CauseName,
+                CauseName = dto.Cause,
                 PaymentStatus = "Success",
-                PaymentMethod = "Card (Dummy)",
-                UserId = dto.UserId,
-                TransactionReference = "TRX-" + Guid.NewGuid().ToString("N").Substring(0, 12)
+                PaymentMethod = dto.PaymentMethod,
+                UserId = dto.UserId, // null nếu khách donate không login
+                TransactionReference = "TRX-" + Guid.NewGuid().ToString("N").Substring(0, 12),
+                DonorName = dto.Anonymous ? "Anonymous" : dto.FullName,
+                DonorEmail = dto.Email,
+                DonorPhone = dto.Phone,
+                DonorAddress = dto.Address,
+                IsAnonymous = dto.Anonymous
             };
 
             _context.Donations.Add(donation);
