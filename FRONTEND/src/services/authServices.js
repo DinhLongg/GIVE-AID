@@ -145,3 +145,57 @@ export const logout = () => {
       };
     }
   };
+
+  /**
+   * Forgot password - Send password reset email
+   */
+  export const forgotPassword = async (email) => {
+    try {
+      const response = await api.post('/auth/forgot-password', { email: email?.trim() || '' });
+      return {
+        success: true,
+        message: response.data.message || 'If the email exists in our system, a password reset link has been sent.'
+      };
+    } catch (error) {
+      console.error('Forgot password error:', error.response?.data);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to send password reset email'
+      };
+    }
+  };
+
+  /**
+   * Reset password with token
+   */
+  export const resetPassword = async (token, newPassword, confirmPassword) => {
+    try {
+      // Try to decode token in case it was encoded
+      let decodedToken = token;
+      try {
+        decodedToken = decodeURIComponent(token || '');
+        if (decodedToken !== token) {
+          console.log('[Debug] Reset password token was URL encoded, decoded to:', decodedToken);
+        }
+      } catch (e) {
+        // Token might already be decoded
+        console.log('[Debug] Reset password token appears to be already decoded');
+      }
+
+      const response = await api.post('/auth/reset-password', {
+        token: decodedToken,
+        newPassword: newPassword || '',
+        confirmPassword: confirmPassword || ''
+      });
+      return {
+        success: true,
+        message: response.data.message || 'Password has been reset successfully'
+      };
+    } catch (error) {
+      console.error('Reset password error:', error.response?.data);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to reset password'
+      };
+    }
+  };

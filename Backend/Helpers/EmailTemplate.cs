@@ -133,5 +133,61 @@ namespace Backend.Helpers
 
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Tạo nội dung email reset mật khẩu.
+        /// </summary>
+        public static string PasswordResetEmailTemplate(string? fullName, string? resetLink, string? resetToken)
+        {
+            fullName ??= "User";
+            resetLink ??= "#";
+            resetToken ??= "(No token)";
+
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html>");
+            sb.AppendLine("<head>");
+            sb.AppendLine("    <meta charset='UTF-8'>");
+            sb.AppendLine("    <style>");
+            sb.AppendLine("        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }");
+            sb.AppendLine("        .container { max-width: 600px; margin: 0 auto; padding: 20px; }");
+            sb.AppendLine("        .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }");
+            sb.AppendLine("        .content { background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }");
+            sb.AppendLine("        .button { display: inline-block; background-color: #dc3545; color: white; padding: 14px 28px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }");
+            sb.AppendLine("        .button:hover { background-color: #c82333; }");
+            sb.AppendLine("        .token-box { background-color: #fff; border: 2px dashed #dc3545; padding: 15px; margin: 20px 0; border-radius: 5px; text-align: center; font-family: monospace; }");
+            sb.AppendLine("        .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 12px; }");
+            sb.AppendLine("        .warning { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }");
+            sb.AppendLine("        .danger { background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; }");
+            sb.AppendLine("    </style>");
+            sb.AppendLine("</head>");
+            sb.AppendLine("<body>");
+            sb.AppendLine("    <div class='container'>");
+            sb.AppendLine("        <div class='header'>");
+            sb.AppendLine("            <h1>🔒 Reset Your Password</h1>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='content'>");
+            sb.AppendLine($"            <p>Hello <strong>{fullName}</strong>,</p>");
+            sb.AppendLine("            <p>We received a request to reset your password for your Give-AID account. If you made this request, please click the button below to reset your password:</p>");
+            sb.AppendLine($"            <div style='text-align: center;'><a href='{resetLink}' class='button'>Reset Password</a></div>");
+            sb.AppendLine("            <p>Or copy and paste this link into your browser:</p>");
+            sb.AppendLine($"            <div class='token-box'>{resetLink}</div>");
+            sb.AppendLine("            <div class='warning'>");
+            sb.AppendLine("                <strong>⚠️ Important:</strong> This password reset link will expire in <strong>1 hour</strong>. If the link has expired, please request a new password reset.");
+            sb.AppendLine("            </div>");
+            sb.AppendLine("            <div class='danger'>");
+            sb.AppendLine("                <strong>🔒 Security Notice:</strong> If you did not request a password reset, please ignore this email. Your password will remain unchanged. If you believe your account has been compromised, please contact support immediately.");
+            sb.AppendLine("            </div>");
+            sb.AppendLine("            <p>Best regards,<br><strong>Give-AID Team</strong></p>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='footer'>");
+            sb.AppendLine("            <p>This is an automated email. Please do not reply.</p>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("    </div>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            return sb.ToString();
+        }
     }
 }

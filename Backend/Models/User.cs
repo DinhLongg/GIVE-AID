@@ -34,6 +34,10 @@ namespace Backend.Models
         public string? EmailVerificationToken { get; set; }
         public DateTime? EmailVerificationTokenExpiry { get; set; }
 
+        // Password Reset
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
+
         public ICollection<Donation>? Donations { get; set; }
         public ICollection<Invitation>? SentInvitations { get; set; }
     }

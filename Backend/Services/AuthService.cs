@@ -346,5 +346,182 @@ namespace Backend.Services
 
             return (true, "Password changed successfully");
         }
+
+        /// <summary>
+        /// Generate a random password reset token
+        /// </summary>
+        private string GeneratePasswordResetToken()
+        {
+            // Generate a secure random token (32 characters)
+            var bytes = new byte[24];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(bytes);
+            }
+            return Convert.ToBase64String(bytes)
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .Replace("=", "")
+                .Substring(0, 32);
+        }
+
+        /// <summary>
+        /// Forgot password - Send password reset email
+        /// </summary>
+        public async Task<(bool success, string message)> ForgotPasswordAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return (false, "Email is required");
+
+            // Find user by email (don't reveal if email exists for security)
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            
+            if (user == null)
+            {
+                // Don't reveal if email exists - return success anyway (security best practice)
+                return (true, "If the email exists in our system, a password reset link has been sent.");
+            }
+
+            // Generate password reset token
+            var resetToken = GeneratePasswordResetToken();
+            user.PasswordResetToken = PasswordHasher.Hash(resetToken); // Hash token before saving
+            user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1); // Token expires in 1 hour
+
+            await _context.SaveChangesAsync();
+
+            // Send password reset email asynchronously (fire-and-forget) to not block response
+            var frontendUrl = _config["FrontendUrl"] ?? "http://localhost:5173";
+            var resetLink = $"{frontendUrl}/reset-password?token={resetToken}";
+            var emailBody = EmailTemplate.PasswordResetEmailTemplate(user.FullName, resetLink, resetToken);
+            
+            // Fire-and-forget: Send email asynchronously without awaiting
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    // Set timeout for email sending (5 seconds max)
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    var emailTask = _emailService.SendEmailAsync(
+                        user.Email,
+                        "Reset Your Give-AID Password",
+                        emailBody
+                    );
+                    var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5), cts.Token);
+                    
+                    var completedTask = await Task.WhenAny(emailTask, timeoutTask);
+                    if (completedTask == timeoutTask)
+                    {
+                        cts.Cancel();
+                        Console.WriteLine($"[Warning] Password reset email sending timeout for {user.Email}");
+                    }
+                    else
+                    {
+                        var emailSent = await emailTask;
+                        if (emailSent)
+                        {
+                            Console.WriteLine($"[Info] Password reset email sent successfully to {user.Email}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[Warning] Failed to send password reset email to {user.Email}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Error] Exception while sending password reset email to {user.Email}: {ex.Message}");
+                }
+            });
+
+            // Return immediately without waiting for email to send
+            return (true, "If the email exists in our system, a password reset link has been sent. Please check your email.");
+        }
+
+        /// <summary>
+        /// Reset password with token
+        /// </summary>
+        public async Task<(bool success, string message)> ResetPasswordAsync(ResetPasswordRequest req)
+        {
+            if (string.IsNullOrWhiteSpace(req.Token))
+                return (false, "Reset token is required");
+
+            if (string.IsNullOrWhiteSpace(req.NewPassword))
+                return (false, "New password is required");
+
+            if (req.NewPassword.Length < 6)
+                return (false, "Password must be at least 6 characters");
+
+            if (req.NewPassword != req.ConfirmPassword)
+                return (false, "Passwords do not match");
+
+            // URL decode token in case it was encoded
+            var token = req.Token;
+            try
+            {
+                var decoded = Uri.UnescapeDataString(token);
+                if (decoded != token)
+                {
+                    Console.WriteLine($"[Debug] Password reset token was URL encoded, decoded to: '{decoded}'");
+                    token = decoded;
+                }
+            }
+            catch
+            {
+                Console.WriteLine($"[Debug] Password reset token appears to be already decoded or invalid format");
+            }
+
+            // Find user with matching token (hash comparison)
+            var users = await _context.Users
+                .Where(u => u.PasswordResetToken != null)
+                .ToListAsync();
+            
+            Console.WriteLine($"[Debug] Found {users.Count} users with password reset tokens");
+
+            User? user = null;
+
+            // Try to find user by verifying token hash
+            foreach (var u in users)
+            {
+                try
+                {
+                    // BCrypt verify will check if token matches the hash
+                    var isValid = PasswordHasher.Verify(token, u.PasswordResetToken);
+                    Console.WriteLine($"[Debug] Checking user {u.Id} ({u.Email}) - Token match: {isValid}");
+                    
+                    if (isValid)
+                    {
+                        user = u;
+                        Console.WriteLine($"[Info] Found matching user: {u.Id} ({u.Email})");
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Debug] Error verifying password reset token for user {u.Id}: {ex.Message}");
+                    // Continue to next user
+                }
+            }
+
+            if (user == null)
+            {
+                Console.WriteLine($"[Warning] No user found matching password reset token: '{token}'");
+                return (false, "Invalid or expired reset token");
+            }
+
+            // Check if token has expired
+            if (user.PasswordResetTokenExpiry.HasValue && 
+                user.PasswordResetTokenExpiry.Value < DateTime.UtcNow)
+                return (false, "Reset token has expired. Please request a new password reset.");
+
+            // Reset password
+            user.PasswordHash = PasswordHasher.Hash(req.NewPassword);
+            user.PasswordResetToken = null;
+            user.PasswordResetTokenExpiry = null;
+
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine($"[Info] Password reset successfully for user {user.Id} ({user.Email})");
+            return (true, "Password has been reset successfully. You can now login with your new password.");
+        }
     }
 }

@@ -14,6 +14,8 @@ import HelpPage from './pages/HelpPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import PartnersPage from './pages/PartnersPage';
 import ProgramsPage from './pages/ProgramsPage';
 import ProfilePage from './pages/ProfilePage';
@@ -49,6 +51,8 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/partners" element={<PartnersPage />} />
             <Route path="/programs" element={<ProgramsPage />} />
             <Route path="/profile" element={<ProfilePage />} />

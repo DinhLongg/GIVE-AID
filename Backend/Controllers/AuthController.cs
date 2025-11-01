@@ -139,5 +139,66 @@ namespace Backend.Controllers
             // Always return success (security - don't reveal if email exists)
             return Ok(new { message = result.message });
         }
+
+        /// <summary>
+        /// Forgot password - Send password reset email
+        /// </summary>
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest? request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Email))
+            {
+                Console.WriteLine("[Error] ForgotPassword request is null or email is empty");
+                return BadRequest(new { message = "Email is required" });
+            }
+
+            Console.WriteLine($"[Debug] ForgotPassword endpoint - Email: '{request.Email}'");
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .SelectMany(x => x.Value.Errors.Select(e => new { Field = x.Key, Message = e.ErrorMessage }))
+                    .ToList();
+                return BadRequest(new { message = "Validation failed", errors });
+            }
+
+            var result = await _authService.ForgotPasswordAsync(request.Email);
+
+            // Always return success to prevent email enumeration attacks
+            // But backend will still send email if user exists
+            return Ok(new { message = result.message });
+        }
+
+        /// <summary>
+        /// Reset password with token
+        /// </summary>
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest? request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Token))
+            {
+                Console.WriteLine("[Error] ResetPassword request is null or token is empty");
+                return BadRequest(new { message = "Token is required" });
+            }
+
+            Console.WriteLine($"[Debug] ResetPassword endpoint - Token received: '{request.Token}'");
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .SelectMany(x => x.Value.Errors.Select(e => new { Field = x.Key, Message = e.ErrorMessage }))
+                    .ToList();
+                return BadRequest(new { message = "Validation failed", errors });
+            }
+
+            var result = await _authService.ResetPasswordAsync(request);
+
+            if (!result.success)
+                return BadRequest(new { message = result.message });
+
+            return Ok(new { message = result.message });
+        }
     }
 }
