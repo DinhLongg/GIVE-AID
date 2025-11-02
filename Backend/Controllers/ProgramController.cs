@@ -1,10 +1,6 @@
-﻿
-using Backend.DTOs;
-using Backend.Models;
+﻿using Backend.DTOs;
 using Backend.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace Backend.Controllers
 {
@@ -12,39 +8,43 @@ namespace Backend.Controllers
     [Route("api/[controller]")]
     public class ProgramController : ControllerBase
     {
-        private readonly ProgramService _service;
-        public ProgramController(ProgramService service) { _service = service; }
+        private readonly ProgramService _programService;
 
+        public ProgramController(ProgramService programService)
+        {
+            _programService = programService;
+        }
+
+        /// <summary>Get all programs</summary>
         [HttpGet]
-        public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
-
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> Get(int id) => Ok(await _service.GetByIdAsync(id));
-
-        [Authorize(Roles = "Admin")]
-        [HttpPost]
-        public async Task<IActionResult> Create(NgoProgram p) => Ok(await _service.CreateAsync(p));
-
-        [Authorize(Roles = "Admin")]
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, NgoProgram p)
+        public async Task<IActionResult> GetAll()
         {
-            if (!await _service.UpdateAsync(id, p)) return NotFound();
-            return Ok();
+            var result = await _programService.GetAllAsync();
+            return Ok(result);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        /// <summary>Get program by ID</summary>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            if (!await _service.DeleteAsync(id)) return NotFound();
-            return Ok();
+            var result = await _programService.GetByIdAsync(id);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
+
+        /// <summary>Register interest in program</summary>
         [HttpPost("register")]
-        public async Task<IActionResult> Register(ProgramRegistrationRequest req)
+        public async Task<IActionResult> Register([FromBody] ProgramRegistrationRequest request)
         {
-            // TODO: Gọi ProgramService.RegisterUserToProgram(req)
-            return Ok();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _programService.RegisterAsync(request);
+
+            if (!result.success)
+                return BadRequest(new { message = result.message });
+
+            return Ok(new { message = result.message });
         }
     }
 }

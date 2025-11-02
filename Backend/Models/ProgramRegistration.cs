@@ -1,11 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
-namespace Backend.DTOs
+namespace Backend.Models
 {
-    public class ProgramRegistrationRequest
+    public class ProgramRegistration
     {
-        [Required]
+        public int Id { get; set; }
+
         public int ProgramId { get; set; }
+        public NgoProgram? Program { get; set; }
 
         [Required, MaxLength(120)]
         public string? FullName { get; set; }
@@ -15,5 +18,7 @@ namespace Backend.DTOs
 
         public string? Phone { get; set; }
         public string? Notes { get; set; }
+
+        public DateTime CreatedAt { get; set; }
     }
 }

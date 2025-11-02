@@ -1,5 +1,6 @@
-﻿using Backend.Models;
-using Backend.Data;
+﻿using Backend.Data;
+using Backend.DTOs;
+using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services
@@ -15,14 +16,17 @@ namespace Backend.Services
 
         public async Task<List<NgoProgram>> GetAllAsync()
         {
-            // ✅ Dòng này giờ hợp lệ
-            return await _context.NgoPrograms.Include(p => p.NGO).ToListAsync();
+            return await _context.NgoPrograms
+                                 .Include(p => p.NGO)
+                                 .OrderByDescending(p => p.Id)
+                                 .ToListAsync();
         }
 
         public async Task<NgoProgram?> GetByIdAsync(int id)
         {
-            return await _context.NgoPrograms.Include(p => p.NGO)
-                                             .FirstOrDefaultAsync(p => p.Id == id);
+            return await _context.NgoPrograms
+                                 .Include(p => p.NGO)
+                                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<NgoProgram> CreateAsync(NgoProgram model)
@@ -56,6 +60,29 @@ namespace Backend.Services
             _context.NgoPrograms.Remove(entity);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        // ✅ User register to join a program
+        public async Task<(bool success, string message)> RegisterAsync(ProgramRegistrationRequest req)
+        {
+            var program = await _context.NgoPrograms.FindAsync(req.ProgramId);
+            if (program == null)
+                return (false, "Program not found");
+
+            var registration = new ProgramRegistration
+            {
+                ProgramId = req.ProgramId,
+                FullName = req.FullName,
+                Email = req.Email,
+                Phone = req.Phone,
+                Notes = req.Notes,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.ProgramRegistrations.Add(registration);
+            await _context.SaveChangesAsync();
+
+            return (true, "You have successfully registered for this program.");
         }
     }
 }
