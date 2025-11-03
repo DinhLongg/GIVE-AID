@@ -29,7 +29,6 @@ import GalleryPageAdmin from './pages/admin/GalleryPage';
 import PartnersPageAdmin from './pages/admin/PartnersPage';
 import AboutPageAdmin from './pages/admin/AboutPage';
 
-
 function App() {
   useEffect(() => {
     // Initialize AOS when component mounts

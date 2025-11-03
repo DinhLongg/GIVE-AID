@@ -1,23 +1,25 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { toast } from "react-toastify";
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'react-toastify';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
 
+
   const [formData, setFormData] = useState({
-    fullName: "",
-    username: "",
-    email: "",
-    phone: "",
-    address: "",
-    password: "",
-    confirmPassword: "",
-    terms: false,
+    fullName: '',
+    username: '',
+    email: '',
+    phone: '',
+    address: '',
+    password: '',
+    confirmPassword: '',
+    terms: false
   });
 
+ 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -27,60 +29,60 @@ export default function RegisterPage() {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: value
     });
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors({
         ...errors,
-        [name]: "",
+        [name]: ''
       });
     }
   };
 
   const validateField = (name, value) => {
-    let error = "";
-
+    let error = '';
+    
     switch (name) {
-      case "fullName":
-        if (!value || value.trim() === "") {
-          error = "Full name is required";
+      case 'fullName':
+        if (!value || value.trim() === '') {
+          error = 'Full name is required';
         }
         break;
-      case "username":
-        if (!value || value.trim() === "") {
-          error = "Username is required";
+      case 'username':
+        if (!value || value.trim() === '') {
+          error = 'Username is required';
         } else if (value.trim().length < 3) {
-          error = "Username must be at least 3 characters";
+          error = 'Username must be at least 3 characters';
         } else if (!/^[a-zA-Z0-9_]+$/.test(value.trim())) {
-          error = "Username can only contain letters, numbers, and underscores";
+          error = 'Username can only contain letters, numbers, and underscores';
         }
         break;
-      case "email":
-        if (!value || value.trim() === "") {
-          error = "Email is required";
+      case 'email':
+        if (!value || value.trim() === '') {
+          error = 'Email is required';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
-          error = "Please enter a valid email address";
+          error = 'Please enter a valid email address';
         }
         break;
-      case "password":
+      case 'password':
         if (!value) {
-          error = "Password is required";
+          error = 'Password is required';
         } else if (value.length < 6) {
-          error = "Password must be at least 6 characters";
+          error = 'Password must be at least 6 characters';
         }
         break;
-      case "confirmPassword":
+      case 'confirmPassword':
         if (!value) {
-          error = "Please confirm your password";
+          error = 'Please confirm your password';
         } else if (value !== formData.password) {
-          error = "Passwords do not match";
+          error = 'Passwords do not match';
         }
         break;
       default:
         break;
     }
-
+    
     return error;
   };
 
@@ -88,13 +90,13 @@ export default function RegisterPage() {
     const { name, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: checked,
+      [name]: checked
     });
     // Clear error when user checks
     if (errors[name]) {
       setErrors({
         ...errors,
-        [name]: "",
+        [name]: ''
       });
     }
   };
@@ -104,7 +106,7 @@ export default function RegisterPage() {
     const error = validateField(name, value);
     setErrors({
       ...errors,
-      [name]: error,
+      [name]: error
     });
   };
 
@@ -113,14 +115,12 @@ export default function RegisterPage() {
     let isValid = true;
 
     // Validate all fields
-    Object.keys(formData).forEach((key) => {
-      if (key !== "phone" && key !== "address") {
-        // Phone and address are optional
-        if (key === "terms") {
+    Object.keys(formData).forEach(key => {
+      if (key !== 'phone' && key !== 'address') { // Phone and address are optional
+        if (key === 'terms') {
           // Special validation for checkbox
           if (!formData[key]) {
-            newErrors[key] =
-              "You must agree to the Terms of Service and Privacy Policy";
+            newErrors[key] = 'You must agree to the Terms of Service and Privacy Policy';
             isValid = false;
           }
         } else {
@@ -140,13 +140,14 @@ export default function RegisterPage() {
       const firstErrorField = Object.keys(newErrors)[0];
       const errorElement = document.getElementById(firstErrorField);
       if (errorElement) {
-        errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         errorElement.focus();
       }
     }
 
     return isValid;
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Quan trọng: ngăn form tự submit và reload trang
@@ -167,7 +168,7 @@ export default function RegisterPage() {
         email: formData.email.trim(),
         password: formData.password,
         phone: formData.phone?.trim() || null,
-        address: formData.address?.trim() || null,
+        address: formData.address?.trim() || null
       };
 
       // Bước 4: Gọi API register
@@ -178,74 +179,55 @@ export default function RegisterPage() {
       if (result.success) {
         // Check if token exists - if not, user needs to verify email
         if (!result.token) {
-          toast.success(
-            result.message ||
-              "Registration successful! Please check your email to verify your account.",
-            {
-              autoClose: 3000,
-            }
-          );
+          toast.success(result.message || 'Registration successful! Please check your email to verify your account.', {
+            autoClose: 3000
+          });
           // Redirect immediately (no delay needed)
-          navigate("/verify-email");
+          navigate('/verify-email');
         } else {
           // Old behavior - token returned (shouldn't happen with email verification)
-          toast.success(
-            result.message ||
-              "Registration successful! Redirecting to login...",
-            {
-              autoClose: 500,
-            }
-          );
-          navigate("/login");
+          toast.success(result.message || 'Registration successful! Redirecting to login...', {
+            autoClose: 500
+          });
+          navigate('/login');
         }
       } else {
         // Parse error message and set inline errors
-        const errorMessage =
-          result.message || "Something went wrong. Please try again.";
+        const errorMessage = result.message || 'Something went wrong. Please try again.';
         const newErrors = { ...errors };
 
         // Check for specific field errors
-        if (
-          errorMessage.toLowerCase().includes("email already exists") ||
-          errorMessage.toLowerCase().includes("email exists")
-        ) {
-          newErrors.email = "Email already exists";
-        } else if (
-          errorMessage.toLowerCase().includes("username already exists") ||
-          errorMessage.toLowerCase().includes("username exists")
-        ) {
-          newErrors.username = "Username already exists";
-        } else if (
-          errorMessage.toLowerCase().includes("email") &&
-          errorMessage.toLowerCase().includes("invalid")
-        ) {
-          newErrors.email = "Please enter a valid email address";
-        } else if (
-          errorMessage.toLowerCase().includes("username") &&
-          errorMessage.toLowerCase().includes("invalid")
-        ) {
-          newErrors.username = "Invalid username format";
-        } else if (errorMessage.toLowerCase().includes("password")) {
-          newErrors.password = "Password validation failed";
+        if (errorMessage.toLowerCase().includes('email already exists') || 
+            errorMessage.toLowerCase().includes('email exists')) {
+          newErrors.email = 'Email already exists';
+        } else if (errorMessage.toLowerCase().includes('username already exists') || 
+                   errorMessage.toLowerCase().includes('username exists')) {
+          newErrors.username = 'Username already exists';
+        } else if (errorMessage.toLowerCase().includes('email') && 
+                   errorMessage.toLowerCase().includes('invalid')) {
+          newErrors.email = 'Please enter a valid email address';
+        } else if (errorMessage.toLowerCase().includes('username') && 
+                   errorMessage.toLowerCase().includes('invalid')) {
+          newErrors.username = 'Invalid username format';
+        } else if (errorMessage.toLowerCase().includes('password')) {
+          newErrors.password = 'Password validation failed';
         } else {
           // Generic error - show toast for non-field specific errors
           toast.error(errorMessage, {
-            autoClose: 4000,
+            autoClose: 4000
           });
         }
 
         setErrors(newErrors);
 
         // Scroll to first error field immediately
-        const firstErrorField = Object.keys(newErrors).find(
-          (key) => newErrors[key]
-        );
+        const firstErrorField = Object.keys(newErrors).find(key => newErrors[key]);
         if (firstErrorField) {
           // Use requestAnimationFrame for smooth scroll without delay
           requestAnimationFrame(() => {
             const element = document.getElementById(firstErrorField);
             if (element) {
-              element.scrollIntoView({ behavior: "smooth", block: "center" });
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
               element.focus();
             }
           });
@@ -253,19 +235,15 @@ export default function RegisterPage() {
 
         // Show toast if there are field-specific errors to draw attention
         if (newErrors.email || newErrors.username) {
-          toast.error("Please check the highlighted fields below", {
-            autoClose: 3000,
+          toast.error('Please check the highlighted fields below', {
+            autoClose: 3000
           });
         }
       }
     } catch (error) {
-      toast.error(
-        "Connection error: Unable to connect to server. Please check your internet connection and try again.",
-        {
-          autoClose: 4000,
-        },
-        error
-      );
+      toast.error('Connection error: Unable to connect to server. Please check your internet connection and try again.', {
+        autoClose: 4000
+      });
     } finally {
       // Bước 6: Luôn chạy dù thành công hay thất bại
       // Tắt loading state
@@ -277,19 +255,13 @@ export default function RegisterPage() {
   return (
     <>
       {/* Hero Section */}
-      <section
-        className="py-5 bg-primary text-white"
-        style={{ marginTop: "80px" }}
-      >
+      <section className="py-5 bg-primary text-white" style={{ marginTop: '80px' }}>
         <div className="container">
           <div className="row align-items-center">
             <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-              <h1 className="display-4 fw-bold mb-3">
-                Join Give-AID Community
-              </h1>
+              <h1 className="display-4 fw-bold mb-3">Join Give-AID Community</h1>
               <p className="lead mb-0">
-                Create your account to start making a difference in the
-                community.
+                Create your account to start making a difference in the community.
               </p>
             </div>
           </div>
@@ -304,31 +276,21 @@ export default function RegisterPage() {
               <div className="registration-form-container" data-aos="fade-up">
                 <div className="form-header text-center mb-4">
                   <h3 className="fw-bold mb-3">Create Your Account</h3>
-                  <p className="text-muted">
-                    Please provide the required information
-                  </p>
+                  <p className="text-muted">Please provide the required information</p>
                 </div>
 
-                <form
-                  onSubmit={handleSubmit}
-                  className="registration-form"
-                  noValidate
-                >
+                <form onSubmit={handleSubmit} className="registration-form" noValidate>
                   {/* Personal Information */}
                   <div className="form-section mb-4">
                     <h5 className="section-title">Personal Information</h5>
                     <div className="row">
                       <div className="col-12 mb-3">
-                        <label htmlFor="fullName" className="form-label">
-                          Full Name *
-                        </label>
+                        <label htmlFor="fullName" className="form-label">Full Name *</label>
                         <input
                           type="text"
                           name="fullName"
                           id="fullName"
-                          className={`form-control ${
-                            errors.fullName ? "is-invalid" : ""
-                          }`}
+                          className={`form-control ${errors.fullName ? 'is-invalid' : ''}`}
                           placeholder="Enter your full name"
                           value={formData.fullName}
                           onChange={handleChange}
@@ -336,22 +298,17 @@ export default function RegisterPage() {
                         />
                         {errors.fullName && (
                           <div className="invalid-feedback d-block">
-                            <i className="fas fa-exclamation-circle me-1"></i>
-                            {errors.fullName}
+                            <i className="fas fa-exclamation-circle me-1"></i>{errors.fullName}
                           </div>
                         )}
                       </div>
                       <div className="col-md-6 mb-3">
-                        <label htmlFor="username" className="form-label">
-                          Username *
-                        </label>
+                        <label htmlFor="username" className="form-label">Username *</label>
                         <input
                           type="text"
                           name="username"
                           id="username"
-                          className={`form-control ${
-                            errors.username ? "is-invalid" : ""
-                          }`}
+                          className={`form-control ${errors.username ? 'is-invalid' : ''}`}
                           placeholder="Choose a username (min 3 characters)"
                           value={formData.username}
                           onChange={handleChange}
@@ -359,26 +316,19 @@ export default function RegisterPage() {
                         />
                         {errors.username ? (
                           <div className="invalid-feedback d-block">
-                            <i className="fas fa-exclamation-circle me-1"></i>
-                            {errors.username}
+                            <i className="fas fa-exclamation-circle me-1"></i>{errors.username}
                           </div>
                         ) : (
-                          <div className="form-text">
-                            Username must be at least 3 characters
-                          </div>
+                          <div className="form-text">Username must be at least 3 characters</div>
                         )}
                       </div>
                       <div className="col-md-6 mb-3">
-                        <label htmlFor="email" className="form-label">
-                          Email Address *
-                        </label>
+                        <label htmlFor="email" className="form-label">Email Address *</label>
                         <input
                           type="email"
                           name="email"
                           id="email"
-                          className={`form-control ${
-                            errors.email ? "is-invalid" : ""
-                          }`}
+                          className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                           placeholder="Enter your email"
                           value={formData.email}
                           onChange={handleChange}
@@ -386,15 +336,12 @@ export default function RegisterPage() {
                         />
                         {errors.email && (
                           <div className="invalid-feedback d-block">
-                            <i className="fas fa-exclamation-circle me-1"></i>
-                            {errors.email}
+                            <i className="fas fa-exclamation-circle me-1"></i>{errors.email}
                           </div>
                         )}
                       </div>
                       <div className="col-12 mb-3">
-                        <label htmlFor="phone" className="form-label">
-                          Phone Number
-                        </label>
+                        <label htmlFor="phone" className="form-label">Phone Number</label>
                         <input
                           type="tel"
                           name="phone"
@@ -413,9 +360,7 @@ export default function RegisterPage() {
                     <h5 className="section-title">Address</h5>
                     <div className="row">
                       <div className="col-12 mb-3">
-                        <label htmlFor="address" className="form-label">
-                          Address
-                        </label>
+                        <label htmlFor="address" className="form-label">Address</label>
                         <input
                           type="text"
                           name="address"
@@ -434,17 +379,13 @@ export default function RegisterPage() {
                     <h5 className="section-title">Account Security</h5>
                     <div className="row">
                       <div className="col-md-6 mb-3">
-                        <label htmlFor="password" className="form-label">
-                          Password *
-                        </label>
+                        <label htmlFor="password" className="form-label">Password *</label>
                         <div className="input-group">
                           <input
-                            type={showPassword ? "text" : "password"}
+                            type={showPassword ? 'text' : 'password'}
                             name="password"
                             id="password"
-                            className={`form-control ${
-                              errors.password ? "is-invalid" : ""
-                            }`}
+                            className={`form-control ${errors.password ? 'is-invalid' : ''}`}
                             placeholder="Enter your password"
                             value={formData.password}
                             onChange={handleChange}
@@ -455,36 +396,25 @@ export default function RegisterPage() {
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
                           >
-                            <i
-                              className={`fas ${
-                                showPassword ? "fa-eye-slash" : "fa-eye"
-                              }`}
-                            ></i>
+                            <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                           </button>
                         </div>
                         {errors.password ? (
                           <div className="invalid-feedback d-block">
-                            <i className="fas fa-exclamation-circle me-1"></i>
-                            {errors.password}
+                            <i className="fas fa-exclamation-circle me-1"></i>{errors.password}
                           </div>
                         ) : (
-                          <div className="form-text">
-                            Password must be at least 6 characters
-                          </div>
+                          <div className="form-text">Password must be at least 6 characters</div>
                         )}
                       </div>
                       <div className="col-md-6 mb-3">
-                        <label htmlFor="confirmPassword" className="form-label">
-                          Confirm Password *
-                        </label>
+                        <label htmlFor="confirmPassword" className="form-label">Confirm Password *</label>
                         <div className="input-group">
                           <input
-                            type={showConfirmPassword ? "text" : "password"}
+                            type={showConfirmPassword ? 'text' : 'password'}
                             name="confirmPassword"
                             id="confirmPassword"
-                            className={`form-control ${
-                              errors.confirmPassword ? "is-invalid" : ""
-                            }`}
+                            className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
                             placeholder="Confirm your password"
                             value={formData.confirmPassword}
                             onChange={handleChange}
@@ -493,21 +423,14 @@ export default function RegisterPage() {
                           <button
                             className="btn btn-outline-secondary"
                             type="button"
-                            onClick={() =>
-                              setShowConfirmPassword(!showConfirmPassword)
-                            }
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           >
-                            <i
-                              className={`fas ${
-                                showConfirmPassword ? "fa-eye-slash" : "fa-eye"
-                              }`}
-                            ></i>
+                            <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                           </button>
                         </div>
                         {errors.confirmPassword && (
                           <div className="invalid-feedback d-block">
-                            <i className="fas fa-exclamation-circle me-1"></i>
-                            {errors.confirmPassword}
+                            <i className="fas fa-exclamation-circle me-1"></i>{errors.confirmPassword}
                           </div>
                         )}
                       </div>
@@ -517,32 +440,21 @@ export default function RegisterPage() {
                   {/* Terms & Submit */}
                   <div className="form-section mb-3">
                     <div className="form-check">
-                      <input
-                        className={`form-check-input ${
-                          errors.terms ? "is-invalid" : ""
-                        }`}
-                        type="checkbox"
-                        name="terms"
+                      <input 
+                        className={`form-check-input ${errors.terms ? 'is-invalid' : ''}`}
+                        type="checkbox" 
+                        name="terms" 
                         id="terms"
                         checked={formData.terms}
                         onChange={handleCheckboxChange}
                       />
                       <label className="form-check-label" htmlFor="terms">
-                        I agree to the{" "}
-                        <a href="#" className="text-primary">
-                          Terms of Service
-                        </a>{" "}
-                        and{" "}
-                        <a href="#" className="text-primary">
-                          Privacy Policy
-                        </a>{" "}
-                        *
+                        I agree to the <a href="#" className="text-primary">Terms of Service</a> and <a href="#" className="text-primary">Privacy Policy</a> *
                       </label>
                     </div>
                     {errors.terms && (
                       <div className="invalid-feedback d-block">
-                        <i className="fas fa-exclamation-circle me-1"></i>
-                        {errors.terms}
+                        <i className="fas fa-exclamation-circle me-1"></i>{errors.terms}
                       </div>
                     )}
                   </div>
@@ -560,25 +472,17 @@ export default function RegisterPage() {
                           Nếu đang loading thì show spinner, không thì show text bình thường */}
                       {isLoading ? (
                         <>
-                          <span
-                            className="spinner-border spinner-border-sm me-2"
-                            role="status"
-                            aria-hidden="true"
-                          ></span>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                           Creating Account...
                         </>
                       ) : (
                         <>
-                          <i className="fas fa-user-plus me-2"></i>Create
-                          Account
+                          <i className="fas fa-user-plus me-2"></i>Create Account
                         </>
                       )}
                     </button>
                     <p className="text-muted mt-3">
-                      Already have an account?{" "}
-                      <Link to="/login" className="text-primary">
-                        Sign in here
-                      </Link>
+                      Already have an account? <Link to="/login" className="text-primary">Sign in here</Link>
                     </p>
                   </div>
                 </form>
@@ -590,3 +494,4 @@ export default function RegisterPage() {
     </>
   );
 }
+

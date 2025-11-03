@@ -1,7 +1,10 @@
 import axios from "axios";
 
+// Prefer env-configured API base; fallback to backend HTTP port from launchSettings
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5230/api";
+
 const api = axios.create({
-  baseURL: "https://localhost:7283/api",
+  baseURL: API_BASE,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
