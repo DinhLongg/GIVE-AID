@@ -324,7 +324,9 @@ const ProgramsPage = () => {
                   </div>
                   <div className="row">
                     <div className="col-md-6 mb-3">
-                      <label className="form-label">NGO <span className="text-danger">*</span></label>
+                      <label className="form-label">
+                        NGO <span className="text-danger">*</span>
+                      </label>
                       <select
                         className="form-select"
                         value={formData.ngoId}
@@ -338,6 +340,11 @@ const ProgramsPage = () => {
                           </option>
                         ))}
                       </select>
+                      {ngos.length === 0 && (
+                        <small className="form-text text-danger">
+                          No NGOs available. Please create an NGO first.
+                        </small>
+                      )}
                     </div>
                     <div className="col-md-6 mb-3">
                       <label className="form-label">Location</label>

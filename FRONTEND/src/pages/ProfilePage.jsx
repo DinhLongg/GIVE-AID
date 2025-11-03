@@ -208,7 +208,8 @@ export default function ProfilePage() {
           { autoClose: 750 }
         );
       }
-    } catch (error) {
+    } catch {
+      // Connection error - show user-friendly message
       toast.error(
         <div style={{ display: 'flex', alignItems: 'flex-start' }}>
           <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>⚠️</span>
@@ -222,7 +223,7 @@ export default function ProfilePage() {
           </div>
         </div>,
         { autoClose: 750 }
-      );
+      );  
     } finally {
       setIsSaving(false);
     }
@@ -378,7 +379,8 @@ export default function ProfilePage() {
           { autoClose: 2000 }
         );
       }
-    } catch (error) {
+    } catch {
+      // Connection error - show user-friendly message
       toast.error(
         <div style={{ display: 'flex', alignItems: 'flex-start' }}>
           <span style={{ fontSize: '24px', marginRight: '12px', lineHeight: '1.2' }}>⚠️</span>
