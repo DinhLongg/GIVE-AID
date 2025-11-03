@@ -20,6 +20,7 @@ import PartnersPage from './pages/PartnersPage';
 import ProgramsPage from './pages/ProgramsPage';
 import ProfilePage from './pages/ProfilePage';
 
+
 function App() {
   useEffect(() => {
     // Initialize AOS when component mounts
