@@ -217,8 +217,13 @@ export const deletePartner = async (id) => {
 export const getAboutSection = async (key) => {
   try {
     const response = await api.get(`/about/${key}`);
-    return { success: true, data: response.data };
+    // Backend returns null if section doesn't exist (200 OK, not 404)
+    return { success: true, data: response.data || null };
   } catch (error) {
+    // If 404, treat as no content (section doesn't exist yet)
+    if (error.response?.status === 404) {
+      return { success: true, data: null };
+    }
     return { success: false, message: error.response?.data?.message || 'Failed to fetch about section' };
   }
 };

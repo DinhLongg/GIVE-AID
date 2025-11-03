@@ -18,14 +18,14 @@ namespace Backend.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> Create(Gallery g) => Ok(await _service.CreateAsync(g));
+        public async Task<IActionResult> Create([FromBody] Gallery g) => Ok(await _service.CreateAsync(g));
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            if (!await _service.DeleteAsync(id)) return NotFound();
-            return Ok();
+            if (!await _service.DeleteAsync(id)) return NotFound(new { message = "Gallery item not found" });
+            return Ok(new { message = "Gallery item deleted successfully" });
         }
     }
 }

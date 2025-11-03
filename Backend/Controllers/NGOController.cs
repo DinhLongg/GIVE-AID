@@ -28,6 +28,9 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] NGO model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var created = await _service.CreateAsync(model);
             return Ok(created);
         }
@@ -36,9 +39,12 @@ namespace Backend.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] NGO model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var ok = await _service.UpdateAsync(id, model);
-            if (!ok) return NotFound();
-            return Ok();
+            if (!ok) return NotFound(new { message = "NGO not found" });
+            return Ok(new { message = "NGO updated successfully" });
         }
 
         [Authorize(Roles = "Admin")]
@@ -46,8 +52,8 @@ namespace Backend.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var ok = await _service.DeleteAsync(id);
-            if (!ok) return NotFound();
-            return Ok();
+            if (!ok) return NotFound(new { message = "NGO not found" });
+            return Ok(new { message = "NGO deleted successfully" });
         }
     }
 }
