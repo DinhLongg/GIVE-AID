@@ -79,6 +79,22 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Seed admin user on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<GiveAidContext>();
+    var configuration = services.GetRequiredService<IConfiguration>();
+    try
+    {
+        await Backend.Helpers.DataSeeder.SeedAdminUserAsync(context, configuration);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error seeding admin user: {ex.Message}");
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

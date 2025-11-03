@@ -19,6 +19,15 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import PartnersPage from './pages/PartnersPage';
 import ProgramsPage from './pages/ProgramsPage';
 import ProfilePage from './pages/ProfilePage';
+import AdminRoute from './components/admin/AdminRoute';
+import AdminLayout from './components/admin/AdminLayout';
+import UsersPage from './pages/admin/UsersPage';
+import QueriesPage from './pages/admin/QueriesPage';
+import ProgramsPageAdmin from './pages/admin/ProgramsPage';
+import NGOsPage from './pages/admin/NGOsPage';
+import GalleryPageAdmin from './pages/admin/GalleryPage';
+import PartnersPageAdmin from './pages/admin/PartnersPage';
+import AboutPageAdmin from './pages/admin/AboutPage';
 
 
 function App() {
@@ -41,24 +50,50 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ScrollToTop />
-        <Layout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/donate" element={<DonatePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/gallery" element={<GalleryPage />} />
-            <Route path="/help" element={<HelpPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/partners" element={<PartnersPage />} />
-            <Route path="/programs" element={<ProgramsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          <Route
+            path="/admin/*"
+            element={
+              <AdminRoute>
+                <AdminLayout>
+                  <Routes>
+                    <Route path="users" element={<UsersPage />} />
+                    <Route path="queries" element={<QueriesPage />} />
+                    <Route path="programs" element={<ProgramsPageAdmin />} />
+                    <Route path="ngos" element={<NGOsPage />} />
+                    <Route path="gallery" element={<GalleryPageAdmin />} />
+                    <Route path="partners" element={<PartnersPageAdmin />} />
+                    <Route path="about" element={<AboutPageAdmin />} />
+                    <Route path="*" element={<UsersPage />} />
+                  </Routes>
+                </AdminLayout>
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/*"
+            element={
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/donate" element={<DonatePage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/gallery" element={<GalleryPage />} />
+                  <Route path="/help" element={<HelpPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/verify-email" element={<VerifyEmailPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/partners" element={<PartnersPage />} />
+                  <Route path="/programs" element={<ProgramsPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                </Routes>
+              </Layout>
+            }
+          />
+        </Routes>
         <ToastContainer
           position="top-right"
           autoClose={3000}

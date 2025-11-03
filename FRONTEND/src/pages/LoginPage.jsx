@@ -107,7 +107,38 @@ export default function LoginPage() {
         toast.success(result.message || 'Login successful! Welcome back!', {
           autoClose: 500
         });
-        // Redirect immediately (no delay needed)
+        
+        // Check if there's a redirect path stored (e.g., from AdminRoute)
+        const redirectPath = localStorage.getItem('redirectAfterLogin');
+        if (redirectPath) {
+          localStorage.removeItem('redirectAfterLogin');
+          // Check if user is Admin before redirecting to admin area
+          const token = localStorage.getItem('token');
+          if (token) {
+            // Decode token to check role (or use AuthContext user)
+            try {
+              const base64Url = token.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+              }).join(''));
+              const decoded = JSON.parse(jsonPayload);
+              const userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+                || decoded['role']
+                || decoded.Role
+                || decoded.role;
+              
+              if (userRole === 'Admin' && redirectPath.startsWith('/admin')) {
+                navigate(redirectPath);
+                return;
+              }
+            } catch (error) {
+              // If token decode fails, continue with normal redirect
+            }
+          }
+        }
+        
+        // Normal redirect to home
         navigate('/');
       } else {
         const errorMessage = result.message || 'Invalid username/email or password. Please try again.';

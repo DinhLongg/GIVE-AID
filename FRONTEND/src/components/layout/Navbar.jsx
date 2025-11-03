@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Navbar() {
-    const { user, isAuthenticated, logout } = useAuth();
+    const { user, isAuthenticated, logout, isAdmin } = useAuth();
 
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
@@ -90,6 +90,17 @@ export default function Navbar() {
                                             <span>Profile</span>
                                         </Link>
                                     </li>
+                                    {isAdmin && (
+                                        <li>
+                                            <Link 
+                                                className="dropdown-item user-menu-item" 
+                                                to="/admin"
+                                            >
+                                                <i className="fas fa-tools me-2"></i>
+                                                <span>Admin Dashboard</span>
+                                            </Link>
+                                        </li>
+                                    )}
                                     <li><hr className="dropdown-divider user-menu-divider" /></li>
                                     <li>
                                         <button 
