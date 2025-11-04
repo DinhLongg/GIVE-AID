@@ -20,7 +20,6 @@ namespace Backend.Data
         public DbSet<Cause> Causes { get; set; }
         public DbSet<AboutSection> AboutSections { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
-        public DbSet<ProgramRegistration> ProgramRegistrations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
