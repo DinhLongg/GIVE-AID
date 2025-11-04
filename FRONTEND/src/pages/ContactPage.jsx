@@ -1,6 +1,131 @@
-import {Link} from 'react-router-dom'
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useAuth } from '../contexts/AuthContext';
+import contactService from '../services/contactServices';
+
 export default function ContactPage() {
-    return (
+  const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    inquiryType: '',
+    priority: 'medium',
+    subject: '',
+    message: '',
+    organization: '',
+    website: '',
+    country: '',
+    preferredContactTime: '',
+    newsletter: false,
+    smsUpdates: false,
+    followUp: true,
+    terms: false,
+  });
+
+  // Auto-fill email if user is logged in
+  useEffect(() => {
+    if (user?.email) {
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email,
+      }));
+    }
+  }, [user]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.terms) {
+      toast.error('Please agree to the Terms of Service and Privacy Policy');
+      return;
+    }
+
+    if (!formData.subject || !formData.message) {
+      toast.error('Subject and Message are required');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Combine firstName and lastName into full name for message
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      
+      // Build comprehensive message with all details
+      let comprehensiveMessage = formData.message;
+      
+      if (formData.inquiryType) {
+        comprehensiveMessage = `Inquiry Type: ${formData.inquiryType}\n\n${comprehensiveMessage}`;
+      }
+      
+      if (fullName) {
+        comprehensiveMessage = `Name: ${fullName}\nEmail: ${formData.email || 'Not provided'}\nPhone: ${formData.phone || 'Not provided'}\n\n${comprehensiveMessage}`;
+      }
+      
+      if (formData.organization) {
+        comprehensiveMessage += `\n\nOrganization: ${formData.organization}`;
+      }
+      
+      if (formData.country) {
+        comprehensiveMessage += `\nCountry: ${formData.country}`;
+      }
+      
+      if (formData.preferredContactTime) {
+        comprehensiveMessage += `\nPreferred Contact Time: ${formData.preferredContactTime}`;
+      }
+
+      const queryData = {
+        userId: user?.id || null,
+        subject: formData.subject,
+        message: comprehensiveMessage,
+        email: formData.email,
+        fullName: fullName || formData.firstName || formData.lastName || 'User',
+      };
+
+      await contactService.submitQuery(queryData);
+
+      toast.success('Your message has been sent successfully! We will get back to you within 24 hours.');
+      
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: user?.email || '',
+        phone: '',
+        inquiryType: '',
+        priority: 'medium',
+        subject: '',
+        message: '',
+        organization: '',
+        website: '',
+        country: '',
+        preferredContactTime: '',
+        newsletter: false,
+        smsUpdates: false,
+        followUp: true,
+        terms: false,
+      });
+    } catch (error) {
+      console.error('Contact form error:', error);
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
         <>
             {/* <!-- Hero Section --> */}
     <section className="py-5 bg-primary text-white" style={{ marginTop: '80px'}}>
@@ -79,26 +204,57 @@ export default function ContactPage() {
                             <p className="text-muted">Fill out the form below and we'll get back to you as soon as possible.</p>
                         </div>
                         
-                        <form id="contactForm" className="contact-form">
+                        <form id="contactForm" className="contact-form" onSubmit={handleSubmit}>
                             {/* <!-- Personal Information --> */}
                             <div className="form-section mb-4">
                                 <h5 className="section-title">Personal Information</h5>
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
-                                        <label for="firstName" className="form-label">First Name *</label>
-                                        <input type="text" name="firstName" id="firstName" className="form-control" required/>
+                                        <label htmlFor="firstName" className="form-label">First Name *</label>
+                                        <input 
+                                            type="text" 
+                                            name="firstName" 
+                                            id="firstName" 
+                                            className="form-control" 
+                                            required
+                                            value={formData.firstName}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div className="col-md-6 mb-3">
-                                        <label for="lastName" className="form-label">Last Name *</label>
-                                        <input type="text" name="lastName" id="lastName" className="form-control" required/>
+                                        <label htmlFor="lastName" className="form-label">Last Name *</label>
+                                        <input 
+                                            type="text" 
+                                            name="lastName" 
+                                            id="lastName" 
+                                            className="form-control" 
+                                            required
+                                            value={formData.lastName}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div className="col-md-6 mb-3">
-                                        <label for="email" className="form-label">Email Address *</label>
-                                        <input type="email" name="email" id="email" className="form-control" required/>
+                                        <label htmlFor="email" className="form-label">Email Address *</label>
+                                        <input 
+                                            type="email" 
+                                            name="email" 
+                                            id="email" 
+                                            className="form-control" 
+                                            required
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div className="col-md-6 mb-3">
-                                        <label for="phone" className="form-label">Phone Number</label>
-                                        <input type="tel" name="phone" id="phone" className="form-control"/>
+                                        <label htmlFor="phone" className="form-label">Phone Number</label>
+                                        <input 
+                                            type="tel" 
+                                            name="phone" 
+                                            id="phone" 
+                                            className="form-control"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -108,8 +264,15 @@ export default function ContactPage() {
                                 <h5 className="section-title">Inquiry Details</h5>
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
-                                        <label for="inquiryType" className="form-label">Inquiry Type *</label>
-                                        <select name="inquiryType" id="inquiryType" className="form-select" required>
+                                        <label htmlFor="inquiryType" className="form-label">Inquiry Type *</label>
+                                        <select 
+                                            name="inquiryType" 
+                                            id="inquiryType" 
+                                            className="form-select" 
+                                            required
+                                            value={formData.inquiryType}
+                                            onChange={handleChange}
+                                        >
                                             <option value="">Select Inquiry Type</option>
                                             <option value="general">General Information</option>
                                             <option value="donation">Donation Inquiry</option>
@@ -121,21 +284,45 @@ export default function ContactPage() {
                                         </select>
                                     </div>
                                     <div className="col-md-6 mb-3">
-                                        <label for="priority" className="form-label">Priority Level</label>
-                                        <select name="priority" id="priority" className="form-select">
+                                        <label htmlFor="priority" className="form-label">Priority Level</label>
+                                        <select 
+                                            name="priority" 
+                                            id="priority" 
+                                            className="form-select"
+                                            value={formData.priority}
+                                            onChange={handleChange}
+                                        >
                                             <option value="low">Low</option>
-                                            <option value="medium" selected>Medium</option>
+                                            <option value="medium">Medium</option>
                                             <option value="high">High</option>
                                             <option value="urgent">Urgent</option>
                                         </select>
                                     </div>
                                     <div className="col-12 mb-3">
-                                        <label for="subject" className="form-label">Subject *</label>
-                                        <input type="text" name="subject" id="subject" className="form-control" placeholder="Brief description of your inquiry" required />
+                                        <label htmlFor="subject" className="form-label">Subject *</label>
+                                        <input 
+                                            type="text" 
+                                            name="subject" 
+                                            id="subject" 
+                                            className="form-control" 
+                                            placeholder="Brief description of your inquiry" 
+                                            required
+                                            value={formData.subject}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div className="col-12 mb-3">
-                                        <label for="message" className="form-label">Message *</label>
-                                        <textarea name="message" id="message" className="form-control" rows="6" placeholder="Please provide detailed information about your inquiry..." required></textarea>
+                                        <label htmlFor="message" className="form-label">Message *</label>
+                                        <textarea 
+                                            name="message" 
+                                            id="message" 
+                                            className="form-control" 
+                                            rows="6" 
+                                            placeholder="Please provide detailed information about your inquiry..." 
+                                            required
+                                            value={formData.message}
+                                            onChange={handleChange}
+                                        ></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -145,16 +332,38 @@ export default function ContactPage() {
                                 <h5 className="section-title">Additional Information</h5>
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
-                                        <label for="organization" className="form-label">Organization/Company</label>
-                                        <input type="text" name="organization" id="organization" className="form-control" placeholder="If applicable"/>
+                                        <label htmlFor="organization" className="form-label">Organization/Company</label>
+                                        <input 
+                                            type="text" 
+                                            name="organization" 
+                                            id="organization" 
+                                            className="form-control" 
+                                            placeholder="If applicable"
+                                            value={formData.organization}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div className="col-md-6 mb-3">
-                                        <label for="website" className="form-label">Website</label>
-                                        <input type="url" name="website" id="website" className="form-control" placeholder="https://example.com"/>
+                                        <label htmlFor="website" className="form-label">Website</label>
+                                        <input 
+                                            type="url" 
+                                            name="website" 
+                                            id="website" 
+                                            className="form-control" 
+                                            placeholder="https://example.com"
+                                            value={formData.website}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div className="col-md-6 mb-3">
-                                        <label for="country" className="form-label">Country</label>
-                                        <select name="country" id="country" className="form-select">
+                                        <label htmlFor="country" className="form-label">Country</label>
+                                        <select 
+                                            name="country" 
+                                            id="country" 
+                                            className="form-select"
+                                            value={formData.country}
+                                            onChange={handleChange}
+                                        >
                                             <option value="">Select Country</option>
                                             <option value="VN">Vietnam</option>
                                             <option value="US">United States</option>
@@ -165,8 +374,14 @@ export default function ContactPage() {
                                         </select>
                                     </div>
                                     <div className="col-md-6 mb-3">
-                                        <label for="timezone" className="form-label">Preferred Contact Time</label>
-                                        <select name="timezone" id="timezone" className="form-select">
+                                        <label htmlFor="preferredContactTime" className="form-label">Preferred Contact Time</label>
+                                        <select 
+                                            name="preferredContactTime" 
+                                            id="preferredContactTime" 
+                                            className="form-select"
+                                            value={formData.preferredContactTime}
+                                            onChange={handleChange}
+                                        >
                                             <option value="">Select Time</option>
                                             <option value="morning">Morning (9 AM - 12 PM)</option>
                                             <option value="afternoon">Afternoon (12 PM - 5 PM)</option>
@@ -181,20 +396,41 @@ export default function ContactPage() {
                             <div className="form-section mb-4">
                                 <h5 className="section-title">Communication Preferences</h5>
                                 <div className="form-check mb-3">
-                                    <input className="form-check-input" type="checkbox" name="newsletter" id="newsletter"/>
-                                    <label className="form-check-label" for="newsletter">
+                                    <input 
+                                        className="form-check-input" 
+                                        type="checkbox" 
+                                        name="newsletter" 
+                                        id="newsletter"
+                                        checked={formData.newsletter}
+                                        onChange={handleChange}
+                                    />
+                                    <label className="form-check-label" htmlFor="newsletter">
                                         Subscribe to our newsletter for updates
                                     </label>
                                 </div>
                                 <div className="form-check mb-3">
-                                    <input className="form-check-input" type="checkbox" name="smsUpdates" id="smsUpdates"/>
-                                    <label className="form-check-label" for="smsUpdates">
+                                    <input 
+                                        className="form-check-input" 
+                                        type="checkbox" 
+                                        name="smsUpdates" 
+                                        id="smsUpdates"
+                                        checked={formData.smsUpdates}
+                                        onChange={handleChange}
+                                    />
+                                    <label className="form-check-label" htmlFor="smsUpdates">
                                         Receive SMS updates about your inquiry
                                     </label>
                                 </div>
                                 <div className="form-check mb-3">
-                                    <input className="form-check-input" type="checkbox" name="followUp" id="followUp" checked/>
-                                    <label className="form-check-label" for="followUp">
+                                    <input 
+                                        className="form-check-input" 
+                                        type="checkbox" 
+                                        name="followUp" 
+                                        id="followUp"
+                                        checked={formData.followUp}
+                                        onChange={handleChange}
+                                    />
+                                    <label className="form-check-label" htmlFor="followUp">
                                         Allow follow-up communication
                                     </label>
                                 </div>
@@ -203,17 +439,38 @@ export default function ContactPage() {
                             {/* <!-- Terms & Conditions --> */}
                             <div className="form-section mb-4">
                                 <div className="form-check">
-                                    <input className="form-check-input" type="checkbox" name="terms" id="terms" required/>
-                                    <label className="form-check-label" for="terms">
-                                        I agree to the <Link to ="#" className="text-primary">Terms of Service</Link> and <Link to ="#" className="text-primary">Privacy Policy</Link> *
+                                    <input 
+                                        className="form-check-input" 
+                                        type="checkbox" 
+                                        name="terms" 
+                                        id="terms" 
+                                        required
+                                        checked={formData.terms}
+                                        onChange={handleChange}
+                                    />
+                                    <label className="form-check-label" htmlFor="terms">
+                                        I agree to the <Link to="#" className="text-primary">Terms of Service</Link> and <Link to="#" className="text-primary">Privacy Policy</Link> *
                                     </label>
                                 </div>
                             </div>
                             
                             {/* <!-- Submit Button --> */}
                             <div className="form-section text-center">
-                                <button type="submit" className="btn btn-primary btn-lg px-5">
-                                    <i className="fas fa-paper-plane me-2"></i>Send Message
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-primary btn-lg px-5"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            Sending...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fas fa-paper-plane me-2"></i>Send Message
+                                        </>
+                                    )}
                                 </button>
                                 <p className="text-muted mt-3 small">
                                     <i className="fas fa-clock me-1"></i>
@@ -293,7 +550,7 @@ export default function ContactPage() {
                             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.325123456789!2d106.70000000000001!3d10.776900000000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f4567890abc%3A0x1234567890abcdef!2sDistrict%201%2C%20Ho%20Chi%20Minh%20City%2C%20Vietnam!5e0!3m2!1sen!2sus!4v1234567890123!5m2!1sen!2sus" 
                             width="100%" 
                             height="400" 
-                            style= {{border:'0'}} 
+                            style={{ border: '0' }} 
                             allowfullscreen="" 
                             loading="lazy" 
                             referrerpolicy="no-referrer-when-downgrade">

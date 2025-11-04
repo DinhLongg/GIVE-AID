@@ -1,5 +1,7 @@
 ﻿using Backend.DTOs;
+using Backend.Models;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers
@@ -30,6 +32,41 @@ namespace Backend.Controllers
             var result = await _programService.GetByIdAsync(id);
             if (result == null) return NotFound();
             return Ok(result);
+        }
+
+        /// <summary>Create a new program (Admin only)</summary>
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] NgoProgram model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _programService.CreateAsync(model);
+            return Ok(result);
+        }
+
+        /// <summary>Update a program (Admin only)</summary>
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] NgoProgram model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var ok = await _programService.UpdateAsync(id, model);
+            if (!ok) return NotFound(new { message = "Program not found" });
+            return Ok(new { message = "Program updated successfully" });
+        }
+
+        /// <summary>Delete a program (Admin only)</summary>
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var ok = await _programService.DeleteAsync(id);
+            if (!ok) return NotFound(new { message = "Program not found" });
+            return Ok(new { message = "Program deleted successfully" });
         }
 
         /// <summary>Register interest in program</summary>

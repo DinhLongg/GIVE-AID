@@ -189,5 +189,61 @@ namespace Backend.Helpers
 
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Tạo nội dung email xác nhận khi người dùng gửi contact form.
+        /// </summary>
+        public static string ContactConfirmationEmailTemplate(string? fullName, string? subject, string? queryId)
+        {
+            fullName ??= "Valued Customer";
+            subject ??= "Your inquiry";
+            queryId ??= "N/A";
+
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html>");
+            sb.AppendLine("<head>");
+            sb.AppendLine("    <meta charset='UTF-8'>");
+            sb.AppendLine("    <style>");
+            sb.AppendLine("        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }");
+            sb.AppendLine("        .container { max-width: 600px; margin: 0 auto; padding: 20px; }");
+            sb.AppendLine("        .header { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }");
+            sb.AppendLine("        .content { background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }");
+            sb.AppendLine("        .info-box { background-color: #fff; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; border-radius: 5px; }");
+            sb.AppendLine("        .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 12px; }");
+            sb.AppendLine("        .highlight { color: #007bff; font-weight: bold; }");
+            sb.AppendLine("    </style>");
+            sb.AppendLine("</head>");
+            sb.AppendLine("<body>");
+            sb.AppendLine("    <div class='container'>");
+            sb.AppendLine("        <div class='header'>");
+            sb.AppendLine("            <h1>✓ Message Received</h1>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='content'>");
+            sb.AppendLine($"            <p>Hello <strong>{fullName}</strong>,</p>");
+            sb.AppendLine("            <p>Thank you for contacting Give-AID! We have successfully received your message and our team will review it shortly.</p>");
+            sb.AppendLine("            <div class='info-box'>");
+            sb.AppendLine($"                <p><strong>Subject:</strong> {subject}</p>");
+            sb.AppendLine($"                <p><strong>Reference ID:</strong> <span class='highlight'>{queryId}</span></p>");
+            sb.AppendLine("            </div>");
+            sb.AppendLine("            <p><strong>What happens next?</strong></p>");
+            sb.AppendLine("            <ul>");
+            sb.AppendLine("                <li>Our support team will review your inquiry</li>");
+            sb.AppendLine("                <li>We typically respond within <strong>24 hours</strong></li>");
+            sb.AppendLine("                <li>You will receive an email notification when we reply</li>");
+            sb.AppendLine("            </ul>");
+            sb.AppendLine("            <p>If your inquiry is urgent, please call us at <strong>+84 123 456 789</strong>.</p>");
+            sb.AppendLine("            <p>Best regards,<br><strong>Give-AID Support Team</strong></p>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='footer'>");
+            sb.AppendLine("            <p>This is an automated confirmation email. Please do not reply to this message.</p>");
+            sb.AppendLine("            <p>If you have any questions, please contact us at <a href='mailto:support@giveaid.org'>support@giveaid.org</a></p>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("    </div>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            return sb.ToString();
+        }
     }
 }

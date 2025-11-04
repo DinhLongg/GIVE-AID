@@ -47,6 +47,9 @@ export default function Navbar() {
                             <Link className="nav-link" to="/programs">Programs</Link>
                         </li>
                         <li className="nav-item">
+                            <Link className="nav-link" to="/ngos">NGOs</Link>
+                        </li>
+                        <li className="nav-item">
                             <Link className="nav-link" to="/partners">Our Partners</Link>
                         </li>
                         <li className="nav-item">

@@ -2,6 +2,7 @@
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Backend.Services
@@ -18,13 +19,28 @@ namespace Backend.Services
             return model;
         }
 
-        public async Task<List<NGO>> GetAllAsync()
+        public async Task<List<NGO>> GetAllAsync(bool includePrograms = false)
         {
-            return await _context.NGOs.ToListAsync();
+            if (includePrograms)
+            {
+                return await _context.NGOs
+                    .Include(n => n.NgoPrograms)
+                    .OrderByDescending(n => n.CreatedAt)
+                    .ToListAsync();
+            }
+            return await _context.NGOs
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
         }
 
-        public async Task<NGO> GetByIdAsync(int id)
+        public async Task<NGO?> GetByIdAsync(int id, bool includePrograms = false)
         {
+            if (includePrograms)
+            {
+                return await _context.NGOs
+                    .Include(n => n.NgoPrograms)
+                    .FirstOrDefaultAsync(n => n.Id == id);
+            }
             return await _context.NGOs.FindAsync(id);
         }
 
@@ -40,13 +56,25 @@ namespace Backend.Services
             return true;
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<(bool success, string message)> DeleteAsync(int id)
         {
-            var existing = await _context.NGOs.FindAsync(id);
-            if (existing == null) return false;
+            var existing = await _context.NGOs
+                .Include(n => n.NgoPrograms)
+                .FirstOrDefaultAsync(n => n.Id == id);
+            
+            if (existing == null) 
+                return (false, "NGO not found");
+
+            // Check if NGO has associated programs
+            if (existing.NgoPrograms != null && existing.NgoPrograms.Any())
+            {
+                var programCount = existing.NgoPrograms.Count;
+                return (false, $"Cannot delete NGO. It has {programCount} associated program(s). Please delete or reassign the programs first.");
+            }
+
             _context.NGOs.Remove(existing);
             await _context.SaveChangesAsync();
-            return true;
+            return (true, "NGO deleted successfully");
         }
     }
 }

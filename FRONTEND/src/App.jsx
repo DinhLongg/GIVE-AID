@@ -18,13 +18,14 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import PartnersPage from './pages/PartnersPage';
 import ProgramsPage from './pages/ProgramsPage';
+import NGOsPage from './pages/NGOsPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminRoute from './components/admin/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
 import UsersPage from './pages/admin/UsersPage';
 import QueriesPage from './pages/admin/QueriesPage';
 import ProgramsPageAdmin from './pages/admin/ProgramsPage';
-import NGOsPage from './pages/admin/NGOsPage';
+import NGOsPageAdmin from './pages/admin/NGOsPage';
 import GalleryPageAdmin from './pages/admin/GalleryPage';
 import PartnersPageAdmin from './pages/admin/PartnersPage';
 import AboutPageAdmin from './pages/admin/AboutPage';
@@ -59,7 +60,7 @@ function App() {
                     <Route path="users" element={<UsersPage />} />
                     <Route path="queries" element={<QueriesPage />} />
                     <Route path="programs" element={<ProgramsPageAdmin />} />
-                    <Route path="ngos" element={<NGOsPage />} />
+                    <Route path="ngos" element={<NGOsPageAdmin />} />
                     <Route path="gallery" element={<GalleryPageAdmin />} />
                     <Route path="partners" element={<PartnersPageAdmin />} />
                     <Route path="about" element={<AboutPageAdmin />} />
@@ -87,6 +88,7 @@ function App() {
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/partners" element={<PartnersPage />} />
                   <Route path="/programs" element={<ProgramsPage />} />
+                  <Route path="/ngos" element={<NGOsPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                 </Routes>
               </Layout>

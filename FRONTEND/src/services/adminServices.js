@@ -141,10 +141,13 @@ export const updateNGO = async (id, ngoData) => {
 
 export const deleteNGO = async (id) => {
   try {
-    await api.delete(`/ngo/${id}`);
-    return { success: true, message: 'NGO deleted successfully' };
+    const response = await api.delete(`/ngo/${id}`);
+    return { success: true, message: response.data?.message || 'NGO deleted successfully' };
   } catch (error) {
-    return { success: false, message: error.response?.data?.message || 'Failed to delete NGO' };
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Failed to delete NGO. This NGO may have associated programs.' 
+    };
   }
 };
 
@@ -217,8 +220,13 @@ export const deletePartner = async (id) => {
 export const getAboutSection = async (key) => {
   try {
     const response = await api.get(`/about/${key}`);
-    return { success: true, data: response.data };
+    // Backend returns null if section doesn't exist (200 OK, not 404)
+    return { success: true, data: response.data || null };
   } catch (error) {
+    // If 404, treat as no content (section doesn't exist yet)
+    if (error.response?.status === 404) {
+      return { success: true, data: null };
+    }
     return { success: false, message: error.response?.data?.message || 'Failed to fetch about section' };
   }
 };
