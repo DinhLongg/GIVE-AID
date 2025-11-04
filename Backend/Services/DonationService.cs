@@ -21,12 +21,12 @@ namespace Backend.Services
         public async Task<Donation> CreateAsync(DonationDTO dto)
         {
             // Validate payment fields
-            if (!PaymentValidator.ValidateCardNumber(dto.CardNumber)
-                || !PaymentValidator.ValidateExpiry(dto.Expiry)
-                || !PaymentValidator.ValidateCvv(dto.CVV))
-            {
-                return null;
-            }
+            //if (!PaymentValidator.ValidateCardNumber(dto.CardNumber)
+            //    || !PaymentValidator.ValidateExpiry(dto.Expiry)
+            //    || !PaymentValidator.ValidateCvv(dto.CVV))
+            //{
+            //    return null;
+            //}
 
             var donation = new Donation
             {

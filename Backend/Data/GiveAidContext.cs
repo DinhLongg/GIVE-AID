@@ -12,6 +12,8 @@ namespace Backend.Data
         public DbSet<NGO> NGOs { get; set; }
         public DbSet<Partner> Partners { get; set; }
         public DbSet<NgoProgram> NgoPrograms { get; set; }
+        public DbSet<ProgramRegistration> ProgramRegistrations { get; set; }
+
         public DbSet<Gallery> Galleries { get; set; }
         public DbSet<Query> Queries { get; set; }
         public DbSet<Invitation> Invitations { get; set; }

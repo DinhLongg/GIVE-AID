@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models
@@ -7,7 +8,7 @@ namespace Backend.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Precision(18, 2)]
         public decimal Amount { get; set; }
 
         [Required, MaxLength(150)]

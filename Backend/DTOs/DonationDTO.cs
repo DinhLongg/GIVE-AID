@@ -14,9 +14,9 @@ namespace Backend.DTOs
         public int? UserId { get; set; }
 
         public string PaymentMethod { get; set; } = "Card";
-        public string CardNumber { get; set; } = string.Empty;
-        public string Expiry { get; set; } = string.Empty;
-        public string CVV { get; set; } = string.Empty;
+        //public string CardNumber { get; set; } = string.Empty;
+        //public string Expiry { get; set; } = string.Empty;
+        //public string CVV { get; set; } = string.Empty;
 
         public bool Anonymous { get; set; }
         public bool Newsletter { get; set; }
