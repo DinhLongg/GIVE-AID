@@ -14,12 +14,13 @@ namespace Backend.Controllers
         public NGOController(NGOService service) { _service = service; }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
+        public async Task<IActionResult> GetAll([FromQuery] bool includePrograms = false) 
+            => Ok(await _service.GetAllAsync(includePrograms));
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(int id, [FromQuery] bool includePrograms = false)
         {
-            var n = await _service.GetByIdAsync(id);
+            var n = await _service.GetByIdAsync(id, includePrograms);
             if (n == null) return NotFound();
             return Ok(n);
         }
@@ -51,9 +52,10 @@ namespace Backend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var ok = await _service.DeleteAsync(id);
-            if (!ok) return NotFound(new { message = "NGO not found" });
-            return Ok(new { message = "NGO deleted successfully" });
+            var result = await _service.DeleteAsync(id);
+            if (!result.success) 
+                return BadRequest(new { message = result.message });
+            return Ok(new { message = result.message });
         }
     }
 }

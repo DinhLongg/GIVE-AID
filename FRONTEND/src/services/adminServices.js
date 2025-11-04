@@ -141,10 +141,13 @@ export const updateNGO = async (id, ngoData) => {
 
 export const deleteNGO = async (id) => {
   try {
-    await api.delete(`/ngo/${id}`);
-    return { success: true, message: 'NGO deleted successfully' };
+    const response = await api.delete(`/ngo/${id}`);
+    return { success: true, message: response.data?.message || 'NGO deleted successfully' };
   } catch (error) {
-    return { success: false, message: error.response?.data?.message || 'Failed to delete NGO' };
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Failed to delete NGO. This NGO may have associated programs.' 
+    };
   }
 };
 

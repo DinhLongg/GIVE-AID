@@ -18,6 +18,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import PartnersPage from './pages/PartnersPage';
 import ProgramsPage from './pages/ProgramsPage';
+import NGOsPage from './pages/NGOsPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminRoute from './components/admin/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
@@ -87,6 +88,7 @@ function App() {
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/partners" element={<PartnersPage />} />
                   <Route path="/programs" element={<ProgramsPage />} />
+                  <Route path="/ngos" element={<NGOsPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                 </Routes>
               </Layout>
