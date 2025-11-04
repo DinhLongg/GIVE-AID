@@ -9,5 +9,7 @@ namespace Backend.DTOs
         public string? Subject { get; set; }
         [Required]
         public string? Message { get; set; }
+        public string? Email { get; set; } // For sending confirmation email
+        public string? FullName { get; set; } // For personalization
     }
 }

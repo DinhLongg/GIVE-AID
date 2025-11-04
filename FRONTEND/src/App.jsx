@@ -25,7 +25,7 @@ import AdminLayout from './components/admin/AdminLayout';
 import UsersPage from './pages/admin/UsersPage';
 import QueriesPage from './pages/admin/QueriesPage';
 import ProgramsPageAdmin from './pages/admin/ProgramsPage';
-import NGOsPage from './pages/admin/NGOsPage';
+import NGOsPageAdmin from './pages/admin/NGOsPage';
 import GalleryPageAdmin from './pages/admin/GalleryPage';
 import PartnersPageAdmin from './pages/admin/PartnersPage';
 import AboutPageAdmin from './pages/admin/AboutPage';
@@ -60,7 +60,7 @@ function App() {
                     <Route path="users" element={<UsersPage />} />
                     <Route path="queries" element={<QueriesPage />} />
                     <Route path="programs" element={<ProgramsPageAdmin />} />
-                    <Route path="ngos" element={<NGOsPage />} />
+                    <Route path="ngos" element={<NGOsPageAdmin />} />
                     <Route path="gallery" element={<GalleryPageAdmin />} />
                     <Route path="partners" element={<PartnersPageAdmin />} />
                     <Route path="about" element={<AboutPageAdmin />} />
