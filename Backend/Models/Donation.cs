@@ -15,10 +15,10 @@ namespace Backend.Models
         public string CauseName { get; set; } = string.Empty;
 
         // Personal Info
-        [MaxLength(150)]
+        [Required, MaxLength(150)]
         public string DonorName { get; set; } = string.Empty;
 
-        [EmailAddress, MaxLength(150)]
+        [Required, EmailAddress, MaxLength(150)]
         public string DonorEmail { get; set; } = string.Empty;
 
         [MaxLength(20)]
@@ -44,6 +44,10 @@ namespace Backend.Models
         // Relationship (optional)
         public int? UserId { get; set; }
         public User? User { get; set; }
+
+        // Link to specific program (optional - can be general donation)
+        public int? ProgramId { get; set; }
+        public NgoProgram? Program { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

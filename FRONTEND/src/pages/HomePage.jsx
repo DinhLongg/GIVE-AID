@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useCounter } from '../utilis/useCounter';
+import programService from '../services/programServices';
 
 export default function HomePage() {
     // Counter animations for statistics
@@ -7,6 +9,51 @@ export default function HomePage() {
     const donors = useCounter(2500, 2000);
     const partners = useCounter(150, 2000);
     const usdDonated = useCounter(5000000, 2000);
+
+    const [featuredPrograms, setFeaturedPrograms] = useState([]);
+    const [programStats, setProgramStats] = useState({});
+
+    useEffect(() => {
+        const fetchFeaturedPrograms = async () => {
+            try {
+                const programs = await programService.getAll();
+                // Take first 3 programs or all if less than 3
+                const featured = (programs || []).slice(0, 3);
+                setFeaturedPrograms(featured);
+
+                // Fetch stats for each program
+                const statsPromises = featured.map(async (program) => {
+                    try {
+                        const stats = await programService.getStats(program.id);
+                        return { programId: program.id, stats };
+                    } catch (error) {
+                        console.error(`Failed to load stats for program ${program.id}:`, error);
+                        return { programId: program.id, stats: null };
+                    }
+                });
+
+                const statsResults = await Promise.all(statsPromises);
+                const statsMap = {};
+                statsResults.forEach(({ programId, stats }) => {
+                    statsMap[programId] = stats;
+                });
+                setProgramStats(statsMap);
+            } catch (error) {
+                console.error('Failed to load featured programs:', error);
+            }
+        };
+
+        fetchFeaturedPrograms();
+    }, []);
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(amount || 0);
+    };
 
     return (
       <>
@@ -104,99 +151,67 @@ export default function HomePage() {
             </div>
   
             <div className="row">
-              <div className="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
-                <div className="cause-card h-100">
-                  <div className="cause-image">
-                    <img
-                      src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                      alt="Children Education"
-                      className="img-fluid"
-                    />
-                    <div className="cause-overlay">
-                      <Link to="/donate" className="btn btn-primary">Donate</Link>
-                    </div>
-                  </div>
-                  <div className="cause-content">
-                    <h5 className="cause-title">Children Education</h5>
-                    <p className="cause-description">
-                      Supporting school fees, books, and learning materials for children in difficult circumstances.
-                    </p>
-                    <div className="cause-progress">
-                      <div className="progress">
-                        <div className="progress-bar" role="progressbar" style={{ width: '75%' }}></div>
-                      </div>
-                      <div className="cause-stats">
-                        <span>75% Complete</span>
-                        <span>$15,000</span>
-                      </div>
-                    </div>
-                  </div>
+              {featuredPrograms.length === 0 ? (
+                <div className="col-12 text-center text-muted py-5">
+                  <p>No featured programs available.</p>
+                  <Link to="/programs" className="btn btn-primary">View All Programs</Link>
                 </div>
-              </div>
-  
-              <div className="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
-                <div className="cause-card h-100">
-                  <div className="cause-image">
-                    <img
-                      src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                      alt="Healthcare"
-                      className="img-fluid"
-                    />
-                    <div className="cause-overlay">
-                      <Link to="/donate" className="btn btn-primary">Donate</Link>
-                    </div>
-                  </div>
-                  <div className="cause-content">
-                    <h5 className="cause-title">Healthcare Support</h5>
-                    <p className="cause-description">
-                      Providing free medical services and medicines for the poor and disabled.
-                    </p>
-                    <div className="cause-progress">
-                      <div className="progress">
-                        <div className="progress-bar" role="progressbar" style={{ width: '60%' }}></div>
-                      </div>
-                      <div className="cause-stats">
-                        <span>60% Complete</span>
-                        <span>$12,000</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-  
-              <div className="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
-                <div className="cause-card h-100">
-                  <div className="cause-image">
-                    <img
-                      src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                      alt="Women Empowerment"
-                      className="img-fluid"
-                    />
-                    <div className="cause-overlay">
-                      <Link to="/donate" className="btn btn-primary">Donate</Link>
-                    </div>
-                  </div>
-                  <div className="cause-content">
-                    <h5 className="cause-title">Women Empowerment</h5>
-                    <p className="cause-description">
-                      Supporting women in developing professional skills and starting businesses.
-                    </p>
-                    <div className="cause-progress">
-                      <div className="progress">
-                        <div className="progress-bar" role="progressbar" style={{ width: '45%' }}></div>
-                      </div>
-                      <div className="cause-stats">
-                        <span>45% Complete</span>
-                        <span>$9,000</span>
+              ) : (
+                featuredPrograms.map((program, index) => {
+                  const stats = programStats[program.id];
+                  const progressPercentage = stats?.progressPercentage || 0;
+                  const totalDonations = stats?.totalDonations || 0;
+                  const goalAmount = stats?.goalAmount;
+
+                  return (
+                    <div key={program.id} className="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay={(index + 1) * 100}>
+                      <div className="cause-card h-100">
+                        <div className="cause-image">
+                          <img
+                            src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                            alt={program.title || "Program"}
+                            className="img-fluid"
+                          />
+                          <div className="cause-overlay">
+                            <Link to="/donate" className="btn btn-primary">Donate</Link>
+                          </div>
+                        </div>
+                        <div className="cause-content">
+                          <h5 className="cause-title">{program.title || "Program"}</h5>
+                          <p className="cause-description">
+                            {program.description || "Supporting meaningful charitable activities."}
+                          </p>
+                          {goalAmount && goalAmount > 0 ? (
+                            <div className="cause-progress">
+                              <div className="progress">
+                                <div
+                                  className="progress-bar"
+                                  role="progressbar"
+                                  style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                                ></div>
+                              </div>
+                              <div className="cause-stats">
+                                <span>{Math.round(progressPercentage)}% Complete</span>
+                                <span>{formatCurrency(totalDonations)}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="cause-progress">
+                              <div className="cause-stats">
+                                <span>Donations: {formatCurrency(totalDonations)}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  );
+                })
+              )}
             </div>
   
             <div className="text-center mt-4" data-aos="fade-up">
-              <Link to="/donate" className="btn btn-outline-primary btn-lg">
+              <Link to="/programs" className="btn btn-outline-primary btn-lg">
                 <i className="fas fa-plus me-2"></i>View All Programs
               </Link>
             </div>

@@ -3,6 +3,7 @@ using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Backend.Controllers
 {
@@ -32,6 +33,28 @@ namespace Backend.Controllers
             var result = await _programService.GetByIdAsync(id);
             if (result == null) return NotFound();
             return Ok(result);
+        }
+
+        /// <summary>Get program donation statistics</summary>
+        [HttpGet("{id}/stats")]
+        public async Task<IActionResult> GetStats(int id)
+        {
+            var program = await _programService.GetByIdAsync(id);
+            if (program == null) return NotFound();
+
+            var totalDonations = await _programService.GetTotalDonationsAsync(id);
+            var progressPercentage = await _programService.GetProgressPercentageAsync(id);
+
+            return Ok(new
+            {
+                programId = id,
+                goalAmount = program.GoalAmount,
+                totalDonations = totalDonations,
+                progressPercentage = progressPercentage,
+                remainingAmount = program.GoalAmount.HasValue 
+                    ? Math.Max(0, program.GoalAmount.Value - totalDonations) 
+                    : (decimal?)null
+            });
         }
 
         /// <summary>Create a new program (Admin only)</summary>

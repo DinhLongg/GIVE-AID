@@ -20,6 +20,7 @@ import PartnersPage from './pages/PartnersPage';
 import ProgramsPage from './pages/ProgramsPage';
 import NGOsPage from './pages/NGOsPage';
 import ProfilePage from './pages/ProfilePage';
+import DonationHistoryPage from './pages/DonationHistoryPage';
 import AdminRoute from './components/admin/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
 import UsersPage from './pages/admin/UsersPage';
@@ -92,6 +93,7 @@ function App() {
                   <Route path="/programs" element={<ProgramsPage />} />
                   <Route path="/ngos" element={<NGOsPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/donation-history" element={<DonationHistoryPage />} />
                 </Routes>
               </Layout>
             }

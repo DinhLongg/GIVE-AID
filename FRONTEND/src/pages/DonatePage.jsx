@@ -115,29 +115,34 @@ export default function DonatePage() {
     }
 
     setIsSubmitting(true);
-    try {
-      // Find program title from programId
-      const selectedProgram = programs.find((p) => p.id === Number(formData.programId));
-      const causeName = selectedProgram?.title || "General Donation";
-      
-      if (!causeName || causeName.trim() === "") {
-        toast.error("Please select a valid program");
-        setIsSubmitting(false);
-        return;
-      }
+    
+    // Find program title from programId (move outside try block for error logging)
+    const selectedProgram = programs.find((p) => p.id === Number(formData.programId));
+    const causeName = selectedProgram?.title || "General Donation";
+    
+    if (!causeName || causeName.trim() === "") {
+      toast.error("Please select a valid program");
+      setIsSubmitting(false);
+      return;
+    }
 
-      await donationService.create({
-        userId: user.id,
-        amount: amount,
-        cause: causeName.trim(),
-        fullName: formData.fullName.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone?.trim() || undefined,
-        address: formData.address?.trim() || undefined,
-        paymentMethod: formData.paymentMethod === "credit" ? "Card" : "Card",
-        anonymous: formData.anonymous || false,
-        newsletter: formData.newsletter || false,
-      });
+    // Prepare request payload
+    const requestPayload = {
+      userId: user.id,
+      amount: amount,
+      cause: causeName.trim(),
+      programId: formData.programId ? Number(formData.programId) : undefined, // Link to program if selected
+      fullName: formData.fullName.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone?.trim() || undefined,
+      address: formData.address?.trim() || undefined,
+      paymentMethod: formData.paymentMethod === "credit" ? "Card" : "Card",
+      anonymous: formData.anonymous || false,
+      newsletter: formData.newsletter || false,
+    };
+
+    try {
+      await donationService.create(requestPayload);
 
       toast.success("Thank you for your donation! ❤️");
       setFormData({
@@ -153,10 +158,14 @@ export default function DonatePage() {
       });
     } catch (err) {
       console.error("Donation error:", err);
+      console.error("Error response:", err?.response?.data);
+      console.error("Request payload:", requestPayload);
       
       // Handle validation errors
       if (err?.response?.status === 400) {
         const errorData = err.response?.data;
+        console.error("Error details:", errorData);
+        
         if (errorData?.errors) {
           // Multiple validation errors
           const errorMessages = Object.entries(errorData.errors)

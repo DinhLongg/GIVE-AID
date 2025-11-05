@@ -2,6 +2,8 @@
 using Backend.DTOs;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace Backend.Services
 {
@@ -47,6 +49,7 @@ namespace Backend.Services
             entity.EndDate = model.EndDate;
             entity.Location = model.Location;
             entity.NGOId = model.NGOId;
+            entity.GoalAmount = model.GoalAmount; // Update goal amount
 
             await _context.SaveChangesAsync();
             return true;
@@ -83,6 +86,48 @@ namespace Backend.Services
             await _context.SaveChangesAsync();
 
             return (true, "You have successfully registered for this program.");
+        }
+
+        /// <summary>
+        /// Calculate total donations amount for a specific program
+        /// </summary>
+        public async Task<decimal> GetTotalDonationsAsync(int programId)
+        {
+            return await _context.Donations
+                .Where(d => d.ProgramId == programId && d.PaymentStatus == "Success")
+                .SumAsync(d => d.Amount);
+        }
+
+        /// <summary>
+        /// Calculate progress percentage for a program (0-100)
+        /// </summary>
+        public async Task<decimal> GetProgressPercentageAsync(int programId)
+        {
+            var program = await _context.NgoPrograms.FindAsync(programId);
+            if (program == null || program.GoalAmount == null || program.GoalAmount <= 0)
+                return 0;
+
+            var totalDonations = await GetTotalDonationsAsync(programId);
+            var percentage = (totalDonations / program.GoalAmount.Value) * 100;
+            return Math.Min(percentage, 100); // Cap at 100%
+        }
+
+        /// <summary>
+        /// Get program with donation statistics
+        /// </summary>
+        public async Task<NgoProgram?> GetByIdWithStatsAsync(int id)
+        {
+            var program = await _context.NgoPrograms
+                .Include(p => p.NGO)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (program != null)
+            {
+                // Note: Donation stats are calculated separately, not included in entity
+                // Frontend will call GetTotalDonationsAsync and GetProgressPercentageAsync
+            }
+
+            return program;
         }
     }
 }

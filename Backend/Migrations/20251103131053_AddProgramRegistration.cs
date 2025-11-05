@@ -11,17 +11,8 @@ namespace Backend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "PasswordResetToken",
-                table: "Users",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "PasswordResetTokenExpiry",
-                table: "Users",
-                type: "datetime2",
-                nullable: true);
+            // PasswordResetToken columns already added by migration 20251101120000_AddPasswordResetToUser
+            // Skipping to avoid duplicate column error
 
             migrationBuilder.AlterColumn<string>(
                 name: "TransactionReference",
@@ -113,13 +104,7 @@ namespace Backend.Migrations
             migrationBuilder.DropTable(
                 name: "ProgramRegistrations");
 
-            migrationBuilder.DropColumn(
-                name: "PasswordResetToken",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "PasswordResetTokenExpiry",
-                table: "Users");
+            // Don't drop PasswordResetToken columns - they were added by migration 20251101120000_AddPasswordResetToUser
 
             migrationBuilder.DropColumn(
                 name: "DonorAddress",

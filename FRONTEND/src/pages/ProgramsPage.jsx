@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 export default function ProgramsPage() {
   const [programs, setPrograms] = useState([]);
+  const [programStats, setProgramStats] = useState({}); // { programId: { totalDonations, progressPercentage } }
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -13,6 +14,24 @@ export default function ProgramsPage() {
       try {
         const data = await programService.getAll();
         setPrograms(data || []);
+        
+        // Fetch stats for each program
+        const statsPromises = (data || []).map(async (program) => {
+          try {
+            const stats = await programService.getStats(program.id);
+            return { programId: program.id, stats };
+          } catch (error) {
+            console.error(`Failed to load stats for program ${program.id}:`, error);
+            return { programId: program.id, stats: null };
+          }
+        });
+        
+        const statsResults = await Promise.all(statsPromises);
+        const statsMap = {};
+        statsResults.forEach(({ programId, stats }) => {
+          statsMap[programId] = stats;
+        });
+        setProgramStats(statsMap);
       } catch (error) {
         toast.error("Failed to load programs. Please try again.");
       } finally {
@@ -21,6 +40,15 @@ export default function ProgramsPage() {
     };
     fetchPrograms();
   }, []);
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount || 0);
+  };
 
   const handleRegister = async (programId) => {
     if (!user) {
@@ -75,6 +103,31 @@ export default function ProgramsPage() {
                           {p.endDate ? ` - ${new Date(p.endDate).toLocaleDateString()}` : ""}
                         </span>
                       </div>
+                      
+                      {/* Progress Bar */}
+                      {programStats[p.id] && programStats[p.id].goalAmount && (
+                        <div className="mb-3">
+                          <div className="d-flex justify-content-between align-items-center mb-1">
+                            <small className="text-muted">
+                              {formatCurrency(programStats[p.id].totalDonations || 0)} raised
+                            </small>
+                            <small className="text-muted">
+                              {Math.round(programStats[p.id].progressPercentage || 0)}%
+                            </small>
+                          </div>
+                          <div className="progress" style={{ height: '8px' }}>
+                            <div
+                              className="progress-bar bg-success"
+                              role="progressbar"
+                              style={{ width: `${Math.min(programStats[p.id].progressPercentage || 0, 100)}%` }}
+                            ></div>
+                          </div>
+                          <small className="text-muted">
+                            Goal: {formatCurrency(programStats[p.id].goalAmount)}
+                          </small>
+                        </div>
+                      )}
+                      
                       <button className="btn btn-primary w-100" onClick={() => handleRegister(p.id)}>
                         Register Interest
                       </button>

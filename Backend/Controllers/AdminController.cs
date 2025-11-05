@@ -4,6 +4,7 @@ using Backend.Helpers;
 using Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Backend.Controllers
 {
@@ -75,8 +76,21 @@ namespace Backend.Controllers
         [HttpGet("donations")]
         public async Task<IActionResult> GetAllDonations()
         {
-            var list = await _donationService.GetAllAsync();
-            return Ok(list);
+            try
+            {
+                var list = await _donationService.GetAllAsync();
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AdminController] Error getting donations: {ex.Message}");
+                Console.WriteLine($"[AdminController] StackTrace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[AdminController] Inner exception: {ex.InnerException.Message}");
+                }
+                return StatusCode(500, new { message = "Failed to retrieve donations", error = ex.Message });
+            }
         }
 
         [HttpGet("donations/{id:int}")]

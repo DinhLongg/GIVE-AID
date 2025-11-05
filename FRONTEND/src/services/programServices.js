@@ -15,6 +15,11 @@ const programService = {
     const res = await api.post("/Program/register", data);
     return res.data;
   },
+
+  getStats: async (id) => {
+    const res = await api.get(`/Program/${id}/stats`);
+    return res.data;
+  },
 };
 
 export default programService;

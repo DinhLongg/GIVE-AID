@@ -41,6 +41,13 @@ namespace Backend.Data
                 new Cause { Id = 3, Name = "Health", Description = "Health Care" },
                 new Cause { Id = 4, Name = "Disabled", Description = "Support Disabled" }
             );
+
+            // Configure Donation -> Program relationship
+            modelBuilder.Entity<Donation>()
+                .HasOne(d => d.Program)
+                .WithMany()
+                .HasForeignKey(d => d.ProgramId)
+                .OnDelete(DeleteBehavior.SetNull); // Don't delete donations if program is deleted
         }
     }
 }

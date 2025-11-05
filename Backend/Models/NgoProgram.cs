@@ -1,4 +1,4 @@
-﻿using Backend.Models;
+﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -17,6 +17,10 @@ namespace Backend.Models
         public DateTime? EndDate { get; set; }
 
         public string? Location { get; set; }
+
+        // Goal tracking
+        [Precision(18, 2)]
+        public decimal? GoalAmount { get; set; } // Fundraising goal for this program
 
         public int NGOId { get; set; }
         public NGO? NGO { get; set; }

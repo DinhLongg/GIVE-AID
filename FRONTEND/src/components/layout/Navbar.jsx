@@ -96,6 +96,15 @@ export default function Navbar() {
                                             <span>Profile</span>
                                         </Link>
                                     </li>
+                                    <li>
+                                        <Link 
+                                            className="dropdown-item user-menu-item" 
+                                            to="/donation-history"
+                                        >
+                                            <i className="fas fa-heart me-2"></i>
+                                            <span>Donation History</span>
+                                        </Link>
+                                    </li>
                                     {isAdmin && (
                                         <li>
                                             <Link 

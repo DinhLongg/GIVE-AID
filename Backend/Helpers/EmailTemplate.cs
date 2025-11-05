@@ -59,24 +59,77 @@ namespace Backend.Helpers
         }
 
         /// <summary>
-        /// Tạo nội dung email biên lai khi người dùng quyên góp.
+        /// Tạo nội dung email biên lai khi người dùng quyên góp (HTML template).
         /// </summary>
-        public static string DonationReceiptTemplate(string? donorName, decimal amount, string? cause, string? transactionRef)
+        public static string DonationReceiptTemplate(string? donorName, decimal amount, string? cause, string? transactionRef, DateTime? donationDate = null)
         {
             donorName ??= "Donor";
             cause ??= "General Cause";
             transactionRef ??= "(No reference)";
 
             var sb = new StringBuilder();
-            sb.AppendLine($"Dear {donorName},");
-            sb.AppendLine();
-            sb.AppendLine($"Thank you for your generous donation of {amount:C} to {cause}.");
-            sb.AppendLine($"Transaction reference: {transactionRef}");
-            sb.AppendLine();
-            sb.AppendLine("This is a receipt for your records.");
-            sb.AppendLine();
-            sb.AppendLine("Warm regards,");
-            sb.AppendLine("Give-AID Team");
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html>");
+            sb.AppendLine("<head>");
+            sb.AppendLine("    <meta charset='UTF-8'>");
+            sb.AppendLine("    <style>");
+            sb.AppendLine("        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }");
+            sb.AppendLine("        .container { max-width: 600px; margin: 0 auto; padding: 20px; }");
+            sb.AppendLine("        .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }");
+            sb.AppendLine("        .content { background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }");
+            sb.AppendLine("        .receipt-box { background-color: #fff; border: 2px solid #10b981; padding: 25px; margin: 20px 0; border-radius: 8px; }");
+            sb.AppendLine("        .amount { font-size: 32px; font-weight: bold; color: #10b981; text-align: center; margin: 15px 0; }");
+            sb.AppendLine("        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }");
+            sb.AppendLine("        .info-row:last-child { border-bottom: none; }");
+            sb.AppendLine("        .info-label { font-weight: bold; color: #6b7280; }");
+            sb.AppendLine("        .info-value { color: #111827; }");
+            sb.AppendLine("        .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 12px; }");
+            sb.AppendLine("        .thank-you { text-align: center; font-size: 18px; color: #10b981; font-weight: bold; margin: 20px 0; }");
+            sb.AppendLine("        .highlight { color: #10b981; font-weight: bold; }");
+            sb.AppendLine("    </style>");
+            sb.AppendLine("</head>");
+            sb.AppendLine("<body>");
+            sb.AppendLine("    <div class='container'>");
+            sb.AppendLine("        <div class='header'>");
+            sb.AppendLine("            <h1>❤️ Thank You for Your Donation!</h1>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='content'>");
+            sb.AppendLine($"            <p>Dear <strong>{donorName}</strong>,</p>");
+            sb.AppendLine("            <div class='thank-you'>Thank you for your generous contribution!</div>");
+            sb.AppendLine("            <p>We are truly grateful for your support. Your donation will make a significant difference in the lives of those in need.</p>");
+            sb.AppendLine("            <div class='receipt-box'>");
+            sb.AppendLine("                <h3 style='text-align: center; margin-top: 0; color: #10b981;'>Donation Receipt</h3>");
+            sb.AppendLine($"                <div class='amount'>{amount:C}</div>");
+            sb.AppendLine("                <div class='info-row'>");
+            sb.AppendLine("                    <span class='info-label'>Cause/Program:</span>");
+            sb.AppendLine($"                    <span class='info-value'>{cause}</span>");
+            sb.AppendLine("                </div>");
+            sb.AppendLine("                <div class='info-row'>");
+            sb.AppendLine("                    <span class='info-label'>Transaction Reference:</span>");
+            sb.AppendLine($"                    <span class='info-value'><code style='background: #f3f4f6; padding: 2px 6px; border-radius: 4px;'>{transactionRef}</code></span>");
+            sb.AppendLine("                </div>");
+            sb.AppendLine($"                <div class='info-row'>");
+            sb.AppendLine("                    <span class='info-label'>Date:</span>");
+            sb.AppendLine($"                    <span class='info-value'>{(donationDate ?? DateTime.UtcNow):MMMM dd, yyyy 'at' HH:mm UTC}</span>");
+            sb.AppendLine("                </div>");
+            sb.AppendLine("            </div>");
+            sb.AppendLine("            <p><strong>What happens next?</strong></p>");
+            sb.AppendLine("            <ul>");
+            sb.AppendLine("                <li>Your donation has been successfully processed</li>");
+            sb.AppendLine("                <li>Funds will be allocated to the specified cause/program</li>");
+            sb.AppendLine("                <li>You will receive updates on how your donation is making an impact</li>");
+            sb.AppendLine("            </ul>");
+            sb.AppendLine("            <p style='margin-top: 25px;'>Please keep this email as your receipt for tax purposes (if applicable in your region).</p>");
+            sb.AppendLine("            <p style='margin-top: 20px;'>If you have any questions about your donation, please don't hesitate to contact us.</p>");
+            sb.AppendLine("            <p style='margin-top: 25px;'>Warm regards,<br><strong>Give-AID Team</strong></p>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='footer'>");
+            sb.AppendLine("            <p>This is an automated receipt. Please do not reply to this email.</p>");
+            sb.AppendLine("            <p>For inquiries, contact us at <a href='mailto:support@giveaid.org'>support@giveaid.org</a></p>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("    </div>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
 
             return sb.ToString();
         }

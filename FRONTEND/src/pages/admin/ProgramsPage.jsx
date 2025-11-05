@@ -24,6 +24,7 @@ const ProgramsPage = () => {
     endDate: '',
     location: '',
     ngoId: '',
+    goalAmount: '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -59,6 +60,7 @@ const ProgramsPage = () => {
       endDate: '',
       location: '',
       ngoId: '',
+      goalAmount: '',
     });
     setShowModal(true);
   };
@@ -72,6 +74,7 @@ const ProgramsPage = () => {
       endDate: program.endDate ? new Date(program.endDate).toISOString().split('T')[0] : '',
       location: program.location || '',
       ngoId: program.ngoId || '',
+      goalAmount: program.goalAmount || '',
     });
     setShowModal(true);
   };
@@ -92,6 +95,7 @@ const ProgramsPage = () => {
       endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
       location: formData.location || '',
       ngoId: parseInt(formData.ngoId),
+      goalAmount: formData.goalAmount ? parseFloat(formData.goalAmount) : null,
     };
 
     if (editingProgram) {
@@ -116,6 +120,7 @@ const ProgramsPage = () => {
           endDate: '',
           location: '',
           ngoId: '',
+          goalAmount: '',
         });
         await loadPrograms();
       } else {
@@ -354,6 +359,23 @@ const ProgramsPage = () => {
                         value={formData.location}
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">
+                        Goal Amount (USD) <small className="text-muted">(Optional)</small>
+                      </label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        min="0"
+                        step="0.01"
+                        placeholder="e.g., 10000"
+                        value={formData.goalAmount}
+                        onChange={(e) => setFormData({ ...formData, goalAmount: e.target.value })}
+                      />
+                      <small className="form-text text-muted">
+                        Set a fundraising goal for this program to track progress
+                      </small>
                     </div>
                   </div>
                   <div className="row">
