@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# User-specific appsettings (mỗi thành viên có file riêng)
+Backend/appsettings.Development.json
+Backend/appsettings.*.json
+!Backend/appsettings.example.json

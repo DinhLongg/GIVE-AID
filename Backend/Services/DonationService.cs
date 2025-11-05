@@ -31,7 +31,7 @@ namespace Backend.Services
             var donation = new Donation
             {
                 Amount = dto.Amount,
-                CauseName = dto.Cause,
+                CauseName = string.IsNullOrWhiteSpace(dto.Cause) ? "General Donation" : dto.Cause,
                 PaymentStatus = "Success",
                 PaymentMethod = dto.PaymentMethod,
                 UserId = dto.UserId, // null nếu khách donate không login
@@ -40,7 +40,8 @@ namespace Backend.Services
                 DonorEmail = dto.Email,
                 DonorPhone = dto.Phone,
                 DonorAddress = dto.Address,
-                IsAnonymous = dto.Anonymous
+                IsAnonymous = dto.Anonymous,
+                SubscribeNewsletter = dto.Newsletter
             };
 
             _context.Donations.Add(donation);

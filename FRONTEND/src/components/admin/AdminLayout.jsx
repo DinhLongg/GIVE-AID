@@ -18,6 +18,7 @@ const AdminLayout = ({ children }) => {
   const menuItems = [
     { path: '/admin/users', icon: 'fas fa-users', label: 'Users', key: 'users' },
     { path: '/admin/queries', icon: 'fas fa-question-circle', label: 'Queries', key: 'queries' },
+    { path: '/admin/donations', icon: 'fas fa-donate', label: 'Donations', key: 'donations' },
     { path: '/admin/programs', icon: 'fas fa-calendar-alt', label: 'Programs', key: 'programs' },
     { path: '/admin/ngos', icon: 'fas fa-building', label: 'NGOs', key: 'ngos' },
     { path: '/admin/gallery', icon: 'fas fa-images', label: 'Gallery', key: 'gallery' },

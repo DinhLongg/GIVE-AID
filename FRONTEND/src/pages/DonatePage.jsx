@@ -18,6 +18,9 @@ export default function DonatePage() {
     email: "",
     phone: "",
     address: "",
+    paymentMethod: "credit",
+    anonymous: false,
+    newsletter: true,
   });
 
   useEffect(() => {
@@ -33,14 +36,39 @@ export default function DonatePage() {
     fetchPrograms();
   }, []);
 
+  // Auto-fill user info if logged in
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: user.fullName || prev.fullName,
+        email: user.email || prev.email,
+      }));
+    }
+  }, [user]);
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    
     if (name === "amount" || name === "customAmount") {
       setFormData((prev) => ({ ...prev, amount: value }));
       return;
     }
+    
     if (name === "category" || name === "programId") {
       setFormData((prev) => ({ ...prev, programId: value }));
+      return;
+    }
+
+    // Handle checkboxes
+    if (type === "checkbox") {
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+      return;
+    }
+
+    // Handle radio buttons
+    if (type === "radio") {
+      setFormData((prev) => ({ ...prev, [name]: value }));
       return;
     }
 
@@ -57,35 +85,91 @@ export default function DonatePage() {
       return;
     }
 
+    // Validate form
     if (!formData.programId || !formData.amount) {
       toast.error("Please choose program and amount");
       return;
     }
 
+    const amount = Number(formData.amount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Please enter a valid donation amount");
+      return;
+    }
+
+    if (!formData.fullName || !formData.fullName.trim()) {
+      toast.error("Please enter your full name");
+      return;
+    }
+
+    if (!formData.email || !formData.email.trim()) {
+      toast.error("Please enter your email");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      // Find program title from programId
+      const selectedProgram = programs.find((p) => p.id === Number(formData.programId));
+      const causeName = selectedProgram?.title || "General Donation";
+      
+      if (!causeName || causeName.trim() === "") {
+        toast.error("Please select a valid program");
+        setIsSubmitting(false);
+        return;
+      }
+
       await donationService.create({
         userId: user.id,
-        programId: formData.programId,
-        amount: Number(formData.amount),
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
+        amount: amount,
+        cause: causeName.trim(),
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone?.trim() || undefined,
+        address: formData.address?.trim() || undefined,
+        paymentMethod: formData.paymentMethod === "credit" ? "Card" : "Card",
+        anonymous: formData.anonymous || false,
+        newsletter: formData.newsletter || false,
       });
 
       toast.success("Thank you for your donation! ❤️");
       setFormData({
         amount: "",
         programId: "",
-        fullName: "",
-        email: "",
+        fullName: user?.fullName || "",
+        email: user?.email || "",
         phone: "",
         address: "",
+        paymentMethod: "credit",
+        anonymous: false,
+        newsletter: true,
       });
     } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Donation failed!");
+      console.error("Donation error:", err);
+      
+      // Handle validation errors
+      if (err?.response?.status === 400) {
+        const errorData = err.response?.data;
+        if (errorData?.errors) {
+          // Multiple validation errors
+          const errorMessages = Object.entries(errorData.errors)
+            .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(", ") : errors}`)
+            .join("\n");
+          toast.error(`Validation failed:\n${errorMessages}`, { autoClose: 5000 });
+        } else {
+          // Single error message
+          toast.error(errorData?.message || "Invalid donation data. Please check your information.");
+        }
+      } else {
+        toast.error(err?.response?.data?.message || "Donation failed! Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -489,7 +573,8 @@ export default function DonatePage() {
                           name="paymentMethod"
                           id="creditCard"
                           value="credit"
-                          defaultChecked
+                          checked={formData.paymentMethod === "credit"}
+                          onChange={handleChange}
                         />
                         <label
                           className="form-check-label"
@@ -505,6 +590,8 @@ export default function DonatePage() {
                           name="paymentMethod"
                           id="debitCard"
                           value="debit"
+                          checked={formData.paymentMethod === "debit"}
+                          onChange={handleChange}
                         />
                         <label className="form-check-label" htmlFor="debitCard">
                           <i className="fas fa-credit-card me-2"></i>Debit Card
@@ -614,6 +701,8 @@ export default function DonatePage() {
                         type="checkbox"
                         name="anonymous"
                         id="anonymous"
+                        checked={formData.anonymous}
+                        onChange={handleChange}
                       />
                       <label className="form-check-label" htmlFor="anonymous">
                         Anonymous donation
@@ -625,7 +714,8 @@ export default function DonatePage() {
                         type="checkbox"
                         name="newsletter"
                         id="newsletter"
-                        defaultChecked
+                        checked={formData.newsletter}
+                        onChange={handleChange}
                       />
                       <label className="form-check-label" htmlFor="newsletter">
                         Receive email updates about programs

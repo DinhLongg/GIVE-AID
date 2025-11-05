@@ -1,4 +1,27 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import partnerService from '../services/partnerServices';
+
 export default function PartnersPage() {
+  const [partners, setPartners] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const data = await partnerService.getAll();
+        setPartners(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Failed to load partners:', error);
+        toast.error('Failed to load partners. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPartners();
+  }, []);
+
   return (
     <>
       {/* Hero Section */}
@@ -74,22 +97,81 @@ export default function PartnersPage() {
           <div className="row mb-5">
             <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
               <h2 className="display-5 fw-bold mb-3">Our Partner Organizations</h2>
+              <p className="lead text-muted">
+                {loading ? 'Loading partners...' : partners.length > 0 ? `We are proud to work with ${partners.length} trusted partners` : 'Meet our trusted partners'}
+              </p>
             </div>
           </div>
 
-          <div className="row">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((item, index) => (
-              <div key={index} className="col-lg-3 col-md-4 col-6 mb-4" data-aos="fade-up" data-aos-delay={index * 50}>
-                <div className="partner-logo-card">
-                  <img 
-                    src={`https://ui-avatars.com/api/?name=Partner+${item}&background=2563eb&color=fff&size=200`} 
-                    alt={`Partner ${item}`} 
-                    className="img-fluid" 
-                  />
-                </div>
+          {loading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : partners.length === 0 ? (
+            <div className="text-center py-5">
+              <i className="fas fa-handshake fa-3x mb-3 text-muted"></i>
+              <p className="text-muted">No partners available at the moment.</p>
+              <p className="text-muted small">Check back soon for updates!</p>
+            </div>
+          ) : (
+            <div className="row">
+              {partners.map((partner, index) => (
+                <div 
+                  key={partner.id} 
+                  className="col-lg-3 col-md-4 col-6 mb-4" 
+                  data-aos="fade-up" 
+                  data-aos-delay={index * 50}
+                >
+                  <div className="partner-logo-card h-100 d-flex flex-column align-items-center justify-content-center p-3 shadow-sm rounded">
+                    <div className="mb-3" style={{ minHeight: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {partner.logoUrl ? (
+                        <img 
+                          src={partner.logoUrl} 
+                          alt={partner.name || 'Partner'} 
+                          className="img-fluid"
+                          style={{ maxHeight: '120px', maxWidth: '100%', objectFit: 'contain' }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            const fallback = e.target.parentElement.querySelector('.logo-fallback');
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="logo-fallback d-flex align-items-center justify-content-center"
+                        style={{ 
+                          width: '120px', 
+                          height: '120px', 
+                          display: partner.logoUrl ? 'none' : 'flex',
+                          backgroundColor: '#e9ecef',
+                          borderRadius: '8px'
+                        }}
+                      >
+                        <i className="fas fa-building fa-3x text-muted"></i>
+                      </div>
+                    </div>
+                    <h6 className="partner-name text-center mb-2" style={{ fontSize: '0.9rem', fontWeight: '600', minHeight: '2.5rem' }}>
+                      {partner.name || 'Partner'}
+                    </h6>
+                    {partner.website && (
+                      <a 
+                        href={partner.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn btn-sm btn-outline-primary mt-auto"
+                        style={{ fontSize: '0.75rem' }}
+                      >
+                        <i className="fas fa-external-link-alt me-1"></i>
+                        Visit Website
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -166,9 +248,9 @@ export default function PartnersPage() {
               <p className="lead mb-4">
                 Join us in making a difference. Partner with Give-AID to create lasting positive change in communities.
               </p>
-              <a href="#" className="btn btn-light btn-lg">
+              <Link to="/contact" className="btn btn-light btn-lg">
                 <i className="fas fa-envelope me-2"></i>Contact Us for Partnership
-              </a>
+              </Link>
             </div>
           </div>
         </div>

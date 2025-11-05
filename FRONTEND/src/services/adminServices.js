@@ -56,6 +56,25 @@ export const replyQuery = async (id, reply) => {
   }
 };
 
+// ===== DONATIONS =====
+export const getAllDonations = async () => {
+  try {
+    const response = await api.get('/admin/donations');
+    return { success: true, data: response.data };
+  } catch (error) {
+    return { success: false, message: error.response?.data?.message || 'Failed to fetch donations' };
+  }
+};
+
+export const getDonation = async (id) => {
+  try {
+    const response = await api.get(`/admin/donations/${id}`);
+    return { success: true, data: response.data };
+  } catch (error) {
+    return { success: false, message: error.response?.data?.message || 'Failed to fetch donation' };
+  }
+};
+
 // ===== PROGRAMS =====
 export const getAllPrograms = async () => {
   try {

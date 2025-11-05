@@ -29,6 +29,7 @@ import NGOsPageAdmin from './pages/admin/NGOsPage';
 import GalleryPageAdmin from './pages/admin/GalleryPage';
 import PartnersPageAdmin from './pages/admin/PartnersPage';
 import AboutPageAdmin from './pages/admin/AboutPage';
+import DonationsPageAdmin from './pages/admin/DonationsPage';
 
 function App() {
   useEffect(() => {
@@ -64,6 +65,7 @@ function App() {
                     <Route path="gallery" element={<GalleryPageAdmin />} />
                     <Route path="partners" element={<PartnersPageAdmin />} />
                     <Route path="about" element={<AboutPageAdmin />} />
+                    <Route path="donations" element={<DonationsPageAdmin />} />
                     <Route path="*" element={<UsersPage />} />
                   </Routes>
                 </AdminLayout>
