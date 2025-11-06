@@ -72,6 +72,15 @@ namespace Backend.Services
             if (program == null)
                 return (false, "Program not found");
 
+            // Check for duplicate registration (same email + same program)
+            var existingRegistration = await _context.ProgramRegistrations
+                .FirstOrDefaultAsync(r => r.ProgramId == req.ProgramId && 
+                                           r.Email != null && 
+                                           r.Email.ToLower() == req.Email.ToLower());
+            
+            if (existingRegistration != null)
+                return (false, "You have already registered for this program.");
+
             var registration = new ProgramRegistration
             {
                 ProgramId = req.ProgramId,
@@ -110,6 +119,15 @@ namespace Backend.Services
             var totalDonations = await GetTotalDonationsAsync(programId);
             var percentage = (totalDonations / program.GoalAmount.Value) * 100;
             return Math.Min(percentage, 100); // Cap at 100%
+        }
+
+        /// <summary>
+        /// Get registration count for a specific program
+        /// </summary>
+        public async Task<int> GetRegistrationCountAsync(int programId)
+        {
+            return await _context.ProgramRegistrations
+                .CountAsync(r => r.ProgramId == programId);
         }
 
         /// <summary>

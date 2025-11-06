@@ -81,7 +81,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Seed admin user on startup
+// Seed data on startup
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -89,11 +89,16 @@ using (var scope = app.Services.CreateScope())
     var configuration = services.GetRequiredService<IConfiguration>();
     try
     {
+        // Seed admin user
         await Backend.Helpers.DataSeeder.SeedAdminUserAsync(context, configuration);
+        
+        // Seed NGOs and Programs (only if database is empty)
+        await Backend.Helpers.DataSeeder.SeedNGOsAndProgramsAsync(context);
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error seeding admin user: {ex.Message}");
+        Console.WriteLine($"Error seeding data: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
     }
 }
 

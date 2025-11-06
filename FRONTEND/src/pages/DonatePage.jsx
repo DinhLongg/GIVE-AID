@@ -9,6 +9,7 @@ export default function DonatePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [programs, setPrograms] = useState([]);
+  const [programStats, setProgramStats] = useState({}); // { programId: { totalDonations, progressPercentage, registrationCount } }
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -27,7 +28,26 @@ export default function DonatePage() {
     const fetchPrograms = async () => {
       try {
         const res = await programService.getAll();
-        setPrograms(Array.isArray(res) ? res : []);
+        const programsData = Array.isArray(res) ? res : [];
+        setPrograms(programsData);
+        
+        // Fetch stats for each program
+        const statsPromises = programsData.map(async (program) => {
+          try {
+            const stats = await programService.getStats(program.id);
+            return { programId: program.id, stats };
+          } catch (error) {
+            console.error(`Failed to load stats for program ${program.id}:`, error);
+            return { programId: program.id, stats: null };
+          }
+        });
+        
+        const statsResults = await Promise.all(statsPromises);
+        const statsMap = {};
+        statsResults.forEach(({ programId, stats }) => {
+          statsMap[programId] = stats;
+        });
+        setProgramStats(statsMap);
       } catch (err) {
         console.error(err);
         setPrograms([]);
@@ -74,6 +94,26 @@ export default function DonatePage() {
 
     // các field khác
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleProgramCardClick = (programId) => {
+    setFormData((prev) => ({ ...prev, programId: programId.toString() }));
+    // Scroll to form
+    setTimeout(() => {
+      const formSection = document.getElementById('donationForm');
+      if (formSection) {
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount || 0);
   };
 
   const handleDonate = async (e) => {
@@ -206,7 +246,7 @@ export default function DonatePage() {
         </div>
       </section>
 
-      {/* Donation Categories */}
+      {/* Programs Selection */}
       <section id="categories" className="py-5">
         <div className="container">
           <div className="row mb-5">
@@ -220,151 +260,105 @@ export default function DonatePage() {
             </div>
           </div>
 
-          <div className="row">
-            <div
-              className="col-lg-4 col-md-6 mb-4"
-              data-aos="fade-up"
-              data-aos-delay="100"
-            >
-              <div className="category-card h-100" data-category="education">
-                <div className="category-icon">
-                  <i className="fas fa-graduation-cap"></i>
-                </div>
-                <h5 className="category-title">Children Education</h5>
-                <p className="category-description">
-                  Supporting school fees, books, and learning materials for
-                  children in difficult circumstances.
-                </p>
-                <div className="category-stats">
-                  <span className="amount-raised">$15,000</span>
-                  <span className="progress-text">75% Complete</span>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar" style={{ width: "75%" }}></div>
-                </div>
-              </div>
+          {programs.length === 0 ? (
+            <div className="text-center text-muted py-5">
+              <p>No programs available at the moment.</p>
             </div>
-
-            <div
-              className="col-lg-4 col-md-6 mb-4"
-              data-aos="fade-up"
-              data-aos-delay="200"
-            >
-              <div className="category-card h-100" data-category="healthcare">
-                <div className="category-icon">
-                  <i className="fas fa-heartbeat"></i>
-                </div>
-                <h5 className="category-title">Healthcare Support</h5>
-                <p className="category-description">
-                  Providing free medical services and medicines for the poor and
-                  disabled.
-                </p>
-                <div className="category-stats">
-                  <span className="amount-raised">$12,000</span>
-                  <span className="progress-text">60% Complete</span>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar" style={{ width: "60%" }}></div>
-                </div>
-              </div>
+          ) : (
+            <div className="row">
+              {programs.slice(0, 6).map((program, index) => {
+                const stats = programStats[program.id];
+                const isSelected = formData.programId === program.id.toString();
+                
+                return (
+                  <div
+                    key={program.id}
+                    className="col-lg-4 col-md-6 mb-4"
+                    data-aos="fade-up"
+                    data-aos-delay={(index + 1) * 100}
+                  >
+                    <div
+                      className={`category-card h-100 ${isSelected ? 'selected' : ''}`}
+                      style={{
+                        cursor: 'pointer',
+                        border: isSelected ? '2px solid #0d6efd' : '1px solid #dee2e6',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onClick={() => handleProgramCardClick(program.id)}
+                    >
+                      <h5 className="category-title">{program.title}</h5>
+                      <p 
+                        className="category-description"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          minHeight: '3em',
+                          lineHeight: '1.5em'
+                        }}
+                      >
+                        {program.description || "Supporting meaningful charitable activities."}
+                      </p>
+                      <div className="text-muted small mb-2">
+                        <i className="fas fa-building me-1"></i>
+                        {program.ngo?.name || "NGO"}
+                      </div>
+                      
+                      {/* Progress Bar with Real Data */}
+                      {stats && stats.goalAmount && stats.goalAmount > 0 ? (
+                        <div className="mb-2">
+                          <div className="category-stats d-flex justify-content-between align-items-center mb-1">
+                            <span className="amount-raised">
+                              {formatCurrency(stats.totalDonations || 0)} raised
+                            </span>
+                            <span className="progress-text">
+                              {Math.round(stats.progressPercentage || 0)}% Complete
+                            </span>
+                          </div>
+                          <div className="progress" style={{ height: '8px' }}>
+                            <div
+                              className="progress-bar bg-success"
+                              role="progressbar"
+                              style={{ width: `${Math.min(stats.progressPercentage || 0, 100)}%` }}
+                            ></div>
+                          </div>
+                          <small className="text-muted d-block mt-1">
+                            Goal: {formatCurrency(stats.goalAmount)}
+                          </small>
+                        </div>
+                      ) : stats && stats.totalDonations > 0 ? (
+                        <div className="category-stats">
+                          <span className="amount-raised">
+                            {formatCurrency(stats.totalDonations)} raised
+                          </span>
+                        </div>
+                      ) : null}
+                      
+                      {/* Registration Count */}
+                      {stats && stats.registrationCount !== undefined && (
+                        <div className="mt-2">
+                          <small className="text-muted">
+                            <i className="fas fa-users me-1"></i>
+                            <strong>{stats.registrationCount || 0}</strong> {stats.registrationCount === 1 ? 'person' : 'people'} registered
+                          </small>
+                        </div>
+                      )}
+                      
+                      {isSelected && (
+                        <div className="mt-2">
+                          <small className="text-primary">
+                            <i className="fas fa-check-circle me-1"></i>Selected
+                          </small>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-
-            <div
-              className="col-lg-4 col-md-6 mb-4"
-              data-aos="fade-up"
-              data-aos-delay="300"
-            >
-              <div className="category-card h-100" data-category="women">
-                <div className="category-icon">
-                  <i className="fas fa-female"></i>
-                </div>
-                <h5 className="category-title">Women Empowerment</h5>
-                <p className="category-description">
-                  Supporting women in developing professional skills and
-                  starting businesses.
-                </p>
-                <div className="category-stats">
-                  <span className="amount-raised">$9,000</span>
-                  <span className="progress-text">45% Complete</span>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar" style={{ width: "45%" }}></div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="col-lg-4 col-md-6 mb-4"
-              data-aos="fade-up"
-              data-aos-delay="400"
-            >
-              <div className="category-card h-100" data-category="children">
-                <div className="category-icon">
-                  <i className="fas fa-child"></i>
-                </div>
-                <h5 className="category-title">Child Protection</h5>
-                <p className="category-description">
-                  Protecting and caring for children in particularly difficult
-                  circumstances.
-                </p>
-                <div className="category-stats">
-                  <span className="amount-raised">$8,500</span>
-                  <span className="progress-text">42% Complete</span>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar" style={{ width: "42%" }}></div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="col-lg-4 col-md-6 mb-4"
-              data-aos="fade-up"
-              data-aos-delay="500"
-            >
-              <div className="category-card h-100" data-category="elderly">
-                <div className="category-icon">
-                  <i className="fas fa-user-friends"></i>
-                </div>
-                <h5 className="category-title">Elderly Care</h5>
-                <p className="category-description">
-                  Supporting healthcare and daily activities for lonely elderly
-                  people.
-                </p>
-                <div className="category-stats">
-                  <span className="amount-raised">$6,000</span>
-                  <span className="progress-text">30% Complete</span>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar" style={{ width: "30%" }}></div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="col-lg-4 col-md-6 mb-4"
-              data-aos="fade-up"
-              data-aos-delay="600"
-            >
-              <div className="category-card h-100" data-category="disabled">
-                <div className="category-icon">
-                  <i className="fas fa-wheelchair"></i>
-                </div>
-                <h5 className="category-title">Disability Support</h5>
-                <p className="category-description">
-                  Providing assistive devices and vocational training for people
-                  with disabilities.
-                </p>
-                <div className="category-stats">
-                  <span className="amount-raised">$5,500</span>
-                  <span className="progress-text">28% Complete</span>
-                </div>
-                <div className="progress">
-                  <div className="progress-bar" style={{ width: "28%" }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 

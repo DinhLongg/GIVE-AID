@@ -44,6 +44,7 @@ namespace Backend.Controllers
 
             var totalDonations = await _programService.GetTotalDonationsAsync(id);
             var progressPercentage = await _programService.GetProgressPercentageAsync(id);
+            var registrationCount = await _programService.GetRegistrationCountAsync(id);
 
             return Ok(new
             {
@@ -51,6 +52,7 @@ namespace Backend.Controllers
                 goalAmount = program.GoalAmount,
                 totalDonations = totalDonations,
                 progressPercentage = progressPercentage,
+                registrationCount = registrationCount,
                 remainingAmount = program.GoalAmount.HasValue 
                     ? Math.Max(0, program.GoalAmount.Value - totalDonations) 
                     : (decimal?)null

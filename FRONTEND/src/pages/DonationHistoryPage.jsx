@@ -73,7 +73,7 @@ export default function DonationHistoryPage() {
 
   if (loading) {
     return (
-      <div className="container my-5">
+      <div className="container my-5" style={{ marginTop: '80px' }}>
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading...</span>
@@ -84,7 +84,7 @@ export default function DonationHistoryPage() {
   }
 
   return (
-    <div className="container my-5">
+    <div className="container py-5" style={{ marginTop: '80px' }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>My Donation History</h2>
         <button className="btn btn-primary" onClick={() => navigate('/donate')}>

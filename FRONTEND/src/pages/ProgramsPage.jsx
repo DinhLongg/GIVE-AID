@@ -58,6 +58,17 @@ export default function ProgramsPage() {
     try {
       await programService.register({ programId, fullName: user.fullName, email: user.email });
       toast.success("Registered successfully!");
+      
+      // Refresh stats to update registration count
+      try {
+        const stats = await programService.getStats(programId);
+        setProgramStats(prev => ({
+          ...prev,
+          [programId]: stats
+        }));
+      } catch (error) {
+        console.error("Failed to refresh stats:", error);
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Registration failed");
     }
@@ -78,8 +89,8 @@ export default function ProgramsPage() {
             <div className="text-center py-5">
               <div className="spinner-border text-primary" role="status">
                 <span className="visually-hidden">Loading...</span>
-              </div>
             </div>
+          </div>
           ) : programs.length === 0 ? (
             <div className="text-center text-muted py-5">No programs found.</div>
           ) : (
@@ -92,7 +103,7 @@ export default function ProgramsPage() {
                       <div className="text-muted small mb-2">
                         <i className="fas fa-building me-1"></i>
                         {p.ngo?.name || "NGO"}
-                      </div>
+            </div>
                       <p className="card-text flex-grow-1" style={{ minHeight: 60 }}>
                         {p.description || "No description."}
                       </p>
@@ -101,9 +112,9 @@ export default function ProgramsPage() {
                         <span>
                           {p.startDate ? new Date(p.startDate).toLocaleDateString() : ""}
                           {p.endDate ? ` - ${new Date(p.endDate).toLocaleDateString()}` : ""}
-                        </span>
-                      </div>
-                      
+                    </span>
+            </div>
+
                       {/* Progress Bar */}
                       {programStats[p.id] && programStats[p.id].goalAmount && (
                         <div className="mb-3">
@@ -114,28 +125,38 @@ export default function ProgramsPage() {
                             <small className="text-muted">
                               {Math.round(programStats[p.id].progressPercentage || 0)}%
                             </small>
-                          </div>
+                </div>
                           <div className="progress" style={{ height: '8px' }}>
                             <div
                               className="progress-bar bg-success"
-                              role="progressbar"
+                        role="progressbar"
                               style={{ width: `${Math.min(programStats[p.id].progressPercentage || 0, 100)}%` }}
-                            ></div>
-                          </div>
+                      ></div>
+                    </div>
                           <small className="text-muted">
                             Goal: {formatCurrency(programStats[p.id].goalAmount)}
+                          </small>
+                  </div>
+                      )}
+                      
+                      {/* Registration Count */}
+                      {programStats[p.id] && programStats[p.id].registrationCount !== undefined && (
+                        <div className="mb-3">
+                          <small className="text-muted">
+                            <i className="fas fa-users me-1"></i>
+                            <strong>{programStats[p.id].registrationCount || 0}</strong> {programStats[p.id].registrationCount === 1 ? 'person' : 'people'} registered
                           </small>
                         </div>
                       )}
                       
                       <button className="btn btn-primary w-100" onClick={() => handleRegister(p.id)}>
-                        Register Interest
-                      </button>
+                                Register Interest
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
           )}
         </div>
       </section>
