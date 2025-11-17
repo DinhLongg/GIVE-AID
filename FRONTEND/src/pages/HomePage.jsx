@@ -83,7 +83,7 @@ export default function HomePage() {
               <div className="col-lg-6" data-aos="fade-left">
                 <div className="hero-image">
                   <img
-                    src="https://images.unsplash.com/photo-1593113598332-cd288d649433?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    src="/images/home-hero-banner.jpg"
                     alt="Volunteers helping community"
                     className="img-fluid rounded-3 shadow-lg"
                   />
@@ -168,7 +168,7 @@ export default function HomePage() {
                       <div className="cause-card h-100">
                         <div className="cause-image">
                           <img
-                            src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                          src="/images/home-featured-program.jpg"
                             alt={program.title || "Program"}
                             className="img-fluid"
                           />

@@ -1,9 +1,11 @@
 ﻿using Backend.Data;
 using Backend.Services;
+using Backend.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +21,17 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Give Aid Backend API",
+        Version = "v1",
+        Description = "API surface for the GIVE-AID application"
+    });
+
+    options.OperationFilter<FormFileRequestBodyOperationFilter>();
+});
 
 // DbContext
 var conn = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -109,6 +121,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // Serve static files from wwwroot
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();

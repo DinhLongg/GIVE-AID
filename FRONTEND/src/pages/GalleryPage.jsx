@@ -88,7 +88,15 @@ export default function GalleryPage() {
             {loading ? (
               <p className="text-center">Đang tải dữ liệu...</p>
             ) : galleryList.length > 0 ? (
-              galleryList.map((item, index) => (
+              galleryList.map((item, index) => {
+                // If image is local upload (starts with /uploads/), prefix with backend base URL (without /api)
+                const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5230/api';
+                const backendBase = apiBase.replace('/api', ''); // Remove /api to get backend root
+                const imageSrc = item.imageUrl?.startsWith('/uploads/')
+                  ? `${backendBase}${item.imageUrl}`
+                  : item.imageUrl;
+                
+                return (
                 <div
                   key={item.id || index}
                   className="col-lg-4 col-md-6 mb-4 gallery-item"
@@ -99,8 +107,8 @@ export default function GalleryPage() {
                   <div className="gallery-card">
                     <div className="gallery-image">
                       <img
-                        src={item.imageUrl}
-                        alt={item.title}
+                        src={imageSrc}
+                        alt={item.caption || item.title || 'Gallery image'}
                         className="img-fluid"
                       />
                       <div className="gallery-overlay">
@@ -132,7 +140,8 @@ export default function GalleryPage() {
                     </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             ) : (
               <>
                 {/* Nếu API chưa có dữ liệu, hiển thị mẫu cũ */}

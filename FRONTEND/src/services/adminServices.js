@@ -182,7 +182,18 @@ export const getAllGallery = async () => {
 
 export const createGallery = async (galleryData) => {
   try {
-    const response = await api.post('/gallery', galleryData);
+    // If galleryData is FormData (file upload), remove Content-Type header
+    // to let browser automatically set it with boundary
+    // Otherwise, use default JSON (URL input)
+    const config = galleryData instanceof FormData
+      ? {
+          headers: {
+            'Content-Type': undefined, // Let browser set multipart/form-data with boundary
+          },
+        }
+      : {};
+    
+    const response = await api.post('/gallery', galleryData, config);
     return { success: true, data: response.data };
   } catch (error) {
     return { success: false, message: error.response?.data?.message || 'Failed to create gallery item' };
