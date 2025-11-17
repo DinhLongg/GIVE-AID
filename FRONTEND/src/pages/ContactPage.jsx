@@ -523,7 +523,7 @@ export default function ContactPage() {
                 </div>
                 <div className="col-lg-6" data-aos="fade-left">
                     <div className="office-image">
-                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                        <img src="/images/contact-office.jpg" 
                              alt="Office" className="img-fluid rounded-3 shadow-lg" />
                     </div>
                 </div>

@@ -98,7 +98,7 @@ export default function AboutPage() {
                 </div>
                 <div className="col-lg-6" data-aos="fade-left">
                     <div className="mission-image">
-                        <img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                        <img src="/images/about-mission-hero.jpg" 
                              alt="Mission" className="img-fluid rounded-3 shadow-lg" />
                     </div>
                 </div>
@@ -122,7 +122,7 @@ export default function AboutPage() {
                 <div className="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
                     <div className="team-card">
                         <div className="team-image">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                            <img src="/images/team-member-1-john-smith.jpg" 
                                  alt="John Smith" className="img-fluid" />
                         </div>
                         <div className="team-info">
@@ -162,7 +162,7 @@ export default function AboutPage() {
                 <div className="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
                     <div className="team-card">
                         <div className="team-image">
-                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                            <img src="/images/team-member-3-michael-chen.jpg" 
                                  alt="Michael Chen" className="img-fluid" />
                         </div>
                         <div className="team-info">
@@ -182,7 +182,7 @@ export default function AboutPage() {
                 <div className="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
                     <div className="team-card">
                         <div className="team-image">
-                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                            <img src="/images/team-member-4-emily-rodriguez.jpg" 
                                  alt="Emily Rodriguez" className="img-fluid" />
                         </div>
                         <div className="team-info">

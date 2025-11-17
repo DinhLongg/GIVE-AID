@@ -1,5 +1,6 @@
 ﻿using Backend.Data;
 using Backend.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,7 +10,13 @@ namespace Backend.Services
     public class GalleryService
     {
         private readonly GiveAidContext _context;
-        public GalleryService(GiveAidContext context) { _context = context; }
+        private readonly IWebHostEnvironment _env;
+        
+        public GalleryService(GiveAidContext context, IWebHostEnvironment env)
+        {
+            _context = context;
+            _env = env;
+        }
 
         public async Task<Gallery> CreateAsync(Gallery model)
         {
@@ -29,6 +36,13 @@ namespace Backend.Services
         {
             var e = await _context.Galleries.FindAsync(id);
             if (e == null) return false;
+            
+            // Delete physical file if it's a local upload (starts with /uploads/)
+            if (!string.IsNullOrEmpty(e.ImageUrl) && e.ImageUrl.StartsWith("/uploads/"))
+            {
+                Give_AID.Helpers.FileHelper.DeleteFile(e.ImageUrl, _env);
+            }
+            
             _context.Galleries.Remove(e);
             await _context.SaveChangesAsync();
             return true;
