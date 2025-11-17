@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Custom hook for counter animation
@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
  */
 export const useCounter = (end, duration = 2000, start = true) => {
   const [count, setCount] = useState(0);
-  const countRef = useRef(0);
+  // const countRef = useRef(0);
   const startTimeRef = useRef(null);
 
   useEffect(() => {
@@ -18,13 +18,13 @@ export const useCounter = (end, duration = 2000, start = true) => {
       if (!startTimeRef.current) startTimeRef.current = timestamp;
       const progress = timestamp - startTimeRef.current;
       const percentage = Math.min(progress / duration, 1);
-      
+
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - percentage, 4);
       const current = Math.floor(easeOutQuart * end);
-      
+
       setCount(current);
-      
+
       if (percentage < 1) {
         requestAnimationFrame(animate);
       } else {
@@ -41,4 +41,3 @@ export const useCounter = (end, duration = 2000, start = true) => {
 
   return count;
 };
-
