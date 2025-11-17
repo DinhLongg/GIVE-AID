@@ -1,27 +1,27 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import {
   getAllGallery,
   createGallery,
   deleteGallery,
-} from '../../services/adminServices';
-import { getAllPrograms } from '../../services/adminServices';
+} from "../../services/adminServices";
+import { getAllPrograms } from "../../services/adminServices";
 
 const GalleryPage = () => {
   const [galleryItems, setGalleryItems] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
-  const [uploadType, setUploadType] = useState('url'); // 'url' or 'file'
+  const [uploadType, setUploadType] = useState("url"); // 'url' or 'file'
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
   const [formData, setFormData] = useState({
-    imageUrl: '',
-    caption: '',
-    programId: '',
+    imageUrl: "",
+    caption: "",
+    programId: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -49,13 +49,13 @@ const GalleryPage = () => {
   };
 
   const handleCreateClick = () => {
-    setUploadType('url');
+    setUploadType("url");
     setSelectedFile(null);
     setFilePreview(null);
     setFormData({
-      imageUrl: '',
-      caption: '',
-      programId: '',
+      imageUrl: "",
+      caption: "",
+      programId: "",
     });
     setShowModal(true);
   };
@@ -64,21 +64,30 @@ const GalleryPage = () => {
     const file = e.target.files[0];
     if (file) {
       // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        "image/jpeg",
+      ];
       if (!allowedTypes.includes(file.type)) {
-        toast.error('Invalid file type. Only JPG, JPEG, PNG, GIF, and WEBP are allowed.');
+        toast.error(
+          "Invalid file type. Only JPG, JPEG, PNG, GIF, and WEBP are allowed."
+        );
         return;
       }
 
       // Validate file size (max 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        toast.error('File size exceeds 5MB limit.');
+        toast.error("File size exceeds 5MB limit.");
         return;
       }
 
       setSelectedFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -90,53 +99,53 @@ const GalleryPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate based on upload type
-    if (uploadType === 'url' && !formData.imageUrl.trim()) {
-      toast.error('Image URL is required');
+    if (uploadType === "url" && !formData.imageUrl.trim()) {
+      toast.error("Image URL is required");
       return;
     }
-    
-    if (uploadType === 'file' && !selectedFile) {
-      toast.error('Please select a file to upload');
+
+    if (uploadType === "file" && !selectedFile) {
+      toast.error("Please select a file to upload");
       return;
     }
 
     setSaving(true);
-    
+
     try {
       // Always use FormData for consistency with backend [FromForm] binding
       const formDataObj = new FormData();
-      
-      if (uploadType === 'file' && selectedFile) {
-        formDataObj.append('file', selectedFile);
-      } else if (uploadType === 'url' && formData.imageUrl.trim()) {
-        formDataObj.append('imageUrl', formData.imageUrl.trim());
+
+      if (uploadType === "file" && selectedFile) {
+        formDataObj.append("file", selectedFile);
+      } else if (uploadType === "url" && formData.imageUrl.trim()) {
+        formDataObj.append("imageUrl", formData.imageUrl.trim());
       }
-      
-      formDataObj.append('caption', formData.caption || '');
+
+      formDataObj.append("caption", formData.caption || "");
       if (formData.programId) {
-        formDataObj.append('programId', formData.programId);
+        formDataObj.append("programId", formData.programId);
       }
 
       const result = await createGallery(formDataObj);
       if (result.success) {
-        toast.success('Gallery item created successfully');
+        toast.success("Gallery item created successfully");
         setShowModal(false);
-        setUploadType('url');
+        setUploadType("url");
         setSelectedFile(null);
         setFilePreview(null);
         setFormData({
-          imageUrl: '',
-          caption: '',
-          programId: '',
+          imageUrl: "",
+          caption: "",
+          programId: "",
         });
         await loadGallery();
       } else {
         toast.error(result.message);
       }
     } catch (error) {
-      toast.error('Failed to create gallery item');
+      toast.error("Failed to create gallery item");
       console.error(error);
     } finally {
       setSaving(false);
@@ -221,46 +230,48 @@ const GalleryPage = () => {
             <div className="row g-3">
               {filteredItems.map((item) => {
                 // If image is local upload (starts with /uploads/), prefix with backend base URL (without /api)
-                const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5230/api';
-                const backendBase = apiBase.replace('/api', ''); // Remove /api to get backend root
-                const imageSrc = item.imageUrl?.startsWith('/uploads/')
+                const apiBase =
+                  import.meta.env.VITE_API_BASE || "http://localhost:5230/api";
+                const backendBase = apiBase.replace("/api", ""); // Remove /api to get backend root
+                const imageSrc = item.imageUrl?.startsWith("/uploads/")
                   ? `${backendBase}${item.imageUrl}`
                   : item.imageUrl;
-                
+
                 return (
-                <div key={item.id} className="col-md-4 col-lg-3">
-                  <div className="card">
-                    <img
-                      src={imageSrc}
-                      className="card-img-top"
-                      alt={item.caption || 'Gallery image'}
-                      style={{ height: '200px', objectFit: 'cover' }}
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
-                      }}
-                    />
-                    <div className="card-body">
-                      <p className="card-text">
-                        <small className="text-muted">
-                          {item.caption || 'No caption'}
-                        </small>
-                      </p>
-                      {item.program && (
+                  <div key={item.id} className="col-md-4 col-lg-3">
+                    <div className="card">
+                      <img
+                        src={imageSrc}
+                        className="card-img-top"
+                        alt={item.caption || "Gallery image"}
+                        style={{ height: "200px", objectFit: "cover" }}
+                        onError={(e) => {
+                          e.target.src =
+                            "https://via.placeholder.com/300x200?text=Image+Not+Found";
+                        }}
+                      />
+                      <div className="card-body">
                         <p className="card-text">
-                          <small>
-                            <strong>Program:</strong> {item.program.title}
+                          <small className="text-muted">
+                            {item.caption || "No caption"}
                           </small>
                         </p>
-                      )}
-                      <button
-                        className="btn btn-sm btn-danger w-100"
-                        onClick={() => handleDeleteClick(item)}
-                      >
-                        <i className="fas fa-trash me-1"></i>Delete
-                      </button>
+                        {item.program && (
+                          <p className="card-text">
+                            <small>
+                              <strong>Program:</strong> {item.program.title}
+                            </small>
+                          </p>
+                        )}
+                        <button
+                          className="btn btn-sm btn-danger w-100"
+                          onClick={() => handleDeleteClick(item)}
+                        >
+                          <i className="fas fa-trash me-1"></i>Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
                 );
               })}
             </div>
@@ -270,7 +281,11 @@ const GalleryPage = () => {
 
       {/* Create Modal */}
       {showModal && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -280,13 +295,13 @@ const GalleryPage = () => {
                   className="btn-close"
                   onClick={() => {
                     setShowModal(false);
-                    setUploadType('url');
+                    setUploadType("url");
                     setSelectedFile(null);
                     setFilePreview(null);
                     setFormData({
-                      imageUrl: '',
-                      caption: '',
-                      programId: '',
+                      imageUrl: "",
+                      caption: "",
+                      programId: "",
                     });
                   }}
                 ></button>
@@ -295,43 +310,51 @@ const GalleryPage = () => {
                 <div className="modal-body">
                   {/* Upload Type Toggle */}
                   <div className="mb-3">
-                    <label className="form-label">Image Source <span className="text-danger">*</span></label>
+                    <label className="form-label">
+                      Image Source <span className="text-danger">*</span>
+                    </label>
                     <div className="btn-group w-100" role="group">
                       <input
                         type="radio"
                         className="btn-check"
                         name="uploadType"
                         id="uploadTypeUrl"
-                        checked={uploadType === 'url'}
+                        checked={uploadType === "url"}
                         onChange={() => {
-                          setUploadType('url');
+                          setUploadType("url");
                           setSelectedFile(null);
                           setFilePreview(null);
                         }}
                       />
-                      <label className="btn btn-outline-primary" htmlFor="uploadTypeUrl">
+                      <label
+                        className="btn btn-outline-primary"
+                        htmlFor="uploadTypeUrl"
+                      >
                         <i className="fas fa-link me-2"></i>Enter URL
                       </label>
-                      
+
                       <input
                         type="radio"
                         className="btn-check"
                         name="uploadType"
                         id="uploadTypeFile"
-                        checked={uploadType === 'file'}
+                        checked={uploadType === "file"}
                         onChange={() => {
-                          setUploadType('file');
-                          setFormData({ ...formData, imageUrl: '' });
+                          setUploadType("file");
+                          setFormData({ ...formData, imageUrl: "" });
                         }}
                       />
-                      <label className="btn btn-outline-primary" htmlFor="uploadTypeFile">
+                      <label
+                        className="btn btn-outline-primary"
+                        htmlFor="uploadTypeFile"
+                      >
                         <i className="fas fa-upload me-2"></i>Upload File
                       </label>
                     </div>
                   </div>
 
                   {/* URL Input */}
-                  {uploadType === 'url' && (
+                  {uploadType === "url" && (
                     <div className="mb-3">
                       <label className="form-label">
                         Image URL <span className="text-danger">*</span>
@@ -340,18 +363,25 @@ const GalleryPage = () => {
                         type="url"
                         className="form-control"
                         value={formData.imageUrl}
-                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, imageUrl: e.target.value })
+                        }
                         placeholder="https://example.com/image.jpg"
-                        required={uploadType === 'url'}
+                        required={uploadType === "url"}
                       />
                       {formData.imageUrl && (
                         <div className="mt-2">
                           <img
                             src={formData.imageUrl}
                             alt="Preview"
-                            style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'cover', borderRadius: '5px' }}
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: "300px",
+                              objectFit: "cover",
+                              borderRadius: "5px",
+                            }}
                             onError={(e) => {
-                              e.target.style.display = 'none';
+                              e.target.style.display = "none";
                             }}
                           />
                         </div>
@@ -360,7 +390,7 @@ const GalleryPage = () => {
                   )}
 
                   {/* File Upload */}
-                  {uploadType === 'file' && (
+                  {uploadType === "file" && (
                     <div className="mb-3">
                       <label className="form-label">
                         Select Image <span className="text-danger">*</span>
@@ -370,7 +400,7 @@ const GalleryPage = () => {
                         className="form-control"
                         accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                         onChange={handleFileChange}
-                        required={uploadType === 'file'}
+                        required={uploadType === "file"}
                       />
                       <small className="form-text text-muted">
                         Supported formats: JPG, JPEG, PNG, GIF, WEBP (Max 5MB)
@@ -380,11 +410,17 @@ const GalleryPage = () => {
                           <img
                             src={filePreview}
                             alt="Preview"
-                            style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'cover', borderRadius: '5px' }}
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: "300px",
+                              objectFit: "cover",
+                              borderRadius: "5px",
+                            }}
                           />
                           {selectedFile && (
                             <p className="text-muted small mt-1">
-                              File: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                              File: {selectedFile.name} (
+                              {(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                             </p>
                           )}
                         </div>
@@ -397,16 +433,22 @@ const GalleryPage = () => {
                       className="form-control"
                       rows="3"
                       value={formData.caption}
-                      onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, caption: e.target.value })
+                      }
                       placeholder="Optional caption for the image"
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Associated Program (Optional)</label>
+                    <label className="form-label">
+                      Associated Program (Optional)
+                    </label>
                     <select
                       className="form-select"
                       value={formData.programId}
-                      onChange={(e) => setFormData({ ...formData, programId: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, programId: e.target.value })
+                      }
                     >
                       <option value="">None</option>
                       {programs.map((program) => (
@@ -423,26 +465,33 @@ const GalleryPage = () => {
                     className="btn btn-secondary"
                     onClick={() => {
                       setShowModal(false);
-                      setUploadType('url');
+                      setUploadType("url");
                       setSelectedFile(null);
                       setFilePreview(null);
                       setFormData({
-                        imageUrl: '',
-                        caption: '',
-                        programId: '',
+                        imageUrl: "",
+                        caption: "",
+                        programId: "",
                       });
                     }}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary" disabled={saving}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={saving}
+                  >
                     {saving ? (
                       <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                        ></span>
                         Saving...
                       </>
                     ) : (
-                      'Add Image'
+                      "Add Image"
                     )}
                   </button>
                 </div>
@@ -454,7 +503,11 @@ const GalleryPage = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && itemToDelete && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
@@ -483,7 +536,11 @@ const GalleryPage = () => {
                 >
                   Cancel
                 </button>
-                <button type="button" className="btn btn-danger" onClick={handleDeleteConfirm}>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleDeleteConfirm}
+                >
                   Delete
                 </button>
               </div>
@@ -496,4 +553,3 @@ const GalleryPage = () => {
 };
 
 export default GalleryPage;
-
