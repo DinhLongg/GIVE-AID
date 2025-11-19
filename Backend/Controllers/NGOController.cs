@@ -57,5 +57,16 @@ namespace Backend.Controllers
                 return BadRequest(new { message = result.message });
             return Ok(new { message = result.message });
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin")]
+        public async Task<IActionResult> GetPaged(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null)
+        {
+            var result = await _service.GetPagedAsync(page, pageSize, search);
+            return Ok(result);
+        }
     }
 }

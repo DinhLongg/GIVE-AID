@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import {
-  getAllGallery,
   createGallery,
   deleteGallery,
+  getAdminGallery,
 } from "../../services/adminServices";
 import { getAllPrograms } from "../../services/adminServices";
 
@@ -11,6 +11,7 @@ const GalleryPage = () => {
   const [galleryItems, setGalleryItems] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -24,17 +25,28 @@ const GalleryPage = () => {
     programId: "",
   });
   const [saving, setSaving] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
-    loadGallery();
     loadPrograms();
   }, []);
 
+  useEffect(() => {
+    loadGallery();
+  }, [page, pageSize, searchTerm]);
+
   const loadGallery = async () => {
     setLoading(true);
-    const result = await getAllGallery();
+    const result = await getAdminGallery({
+      page,
+      pageSize,
+      search: searchTerm,
+    });
     if (result.success) {
-      setGalleryItems(result.data || []);
+      setGalleryItems(result.data?.items || []);
+      setTotalItems(result.data?.totalItems || 0);
     } else {
       toast.error(result.message);
     }
@@ -171,12 +183,23 @@ const GalleryPage = () => {
     }
   };
 
-  const filteredItems = galleryItems.filter((item) => {
-    return (
-      item.caption?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.program?.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+  const totalPages = totalItems > 0 ? Math.ceil(totalItems / pageSize) : 1;
+
+  const handleApplySearch = () => {
+    setSearchTerm(searchInput.trim());
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setPage(1);
+  };
 
   if (loading) {
     return (
@@ -206,11 +229,30 @@ const GalleryPage = () => {
                 type="text"
                 className="form-control"
                 placeholder="Search by caption or program..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleApplySearch();
+                  }
+                }}
               />
             </div>
-            <div className="col-md-3 text-end">
+            <div className="col-md-3 text-end d-flex gap-2 justify-content-end">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => {
+                  setSearchInput("");
+                  setSearchTerm("");
+                  setPage(1);
+                }}
+              >
+                Clear
+              </button>
+              <button className="btn btn-primary" onClick={handleApplySearch}>
+                <i className="fas fa-search me-2"></i>Apply
+              </button>
               <button className="btn btn-primary" onClick={loadGallery}>
                 <i className="fas fa-sync-alt me-2"></i>Refresh
               </button>
@@ -222,13 +264,13 @@ const GalleryPage = () => {
       {/* Gallery Grid */}
       <div className="card">
         <div className="card-body">
-          {filteredItems.length === 0 ? (
+          {galleryItems.length === 0 ? (
             <div className="text-center py-5">
               <p>No gallery items found</p>
             </div>
           ) : (
             <div className="row g-3">
-              {filteredItems.map((item) => {
+              {galleryItems.map((item) => {
                 // If image is local upload (starts with /uploads/), prefix with backend base URL (without /api)
                 const apiBase =
                   import.meta.env.VITE_API_BASE || "http://localhost:5230/api";
@@ -276,6 +318,44 @@ const GalleryPage = () => {
               })}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
+        <div>
+          <label className="me-2 fw-semibold">Items per page:</label>
+          <select
+            value={pageSize}
+            onChange={handlePageSizeChange}
+            className="form-select d-inline-block"
+            style={{ width: "auto" }}
+          >
+            {[12, 24, 48].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="d-flex align-items-center gap-2">
+          <button
+            className="btn btn-outline-secondary"
+            disabled={page === 1}
+            onClick={() => handlePageChange(page - 1)}
+          >
+            Prev
+          </button>
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            className="btn btn-outline-secondary"
+            disabled={page === totalPages}
+            onClick={() => handlePageChange(page + 1)}
+          >
+            Next
+          </button>
         </div>
       </div>
 

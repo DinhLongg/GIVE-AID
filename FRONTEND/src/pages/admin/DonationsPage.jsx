@@ -1,25 +1,47 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { getAllDonations, getDonation } from '../../services/adminServices';
+import { getAdminDonations, getDonation } from '../../services/adminServices';
 
 const DonationsPage = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedDonation, setSelectedDonation] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [summary, setSummary] = useState({
+    totalDonations: 0,
+    successDonations: 0,
+    totalAmount: 0,
+    successAmount: 0,
+  });
 
   useEffect(() => {
     loadDonations();
-  }, []);
+  }, [page, pageSize, searchTerm, filterStatus]);
 
   const loadDonations = async () => {
     setLoading(true);
-    const result = await getAllDonations();
+    const result = await getAdminDonations({
+      page,
+      pageSize,
+      search: searchTerm,
+      status: filterStatus,
+    });
     if (result.success) {
-      setDonations(result.data || []);
+      setDonations(result.data?.items || []);
+      setTotalItems(result.data?.totalItems || 0);
+      setSummary({
+        totalDonations: result.data?.summary?.totalDonations || 0,
+        successDonations: result.data?.summary?.successDonations || 0,
+        totalAmount: result.data?.summary?.totalAmount || 0,
+        successAmount: result.data?.summary?.successAmount || 0,
+      });
     } else {
       toast.error(result.message);
     }
@@ -48,29 +70,28 @@ const DonationsPage = () => {
     }).format(amount);
   };
 
-  const filteredDonations = donations.filter((donation) => {
-    const matchesSearch =
-      donation.donorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.donorEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.causeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.transactionReference?.toLowerCase().includes(searchTerm.toLowerCase());
+  const totalPages = totalItems > 0 ? Math.ceil(totalItems / pageSize) : 1;
 
-    const matchesStatus =
-      filterStatus === 'all' ||
-      (filterStatus === 'success' && donation.paymentStatus === 'Success') ||
-      (filterStatus === 'pending' && donation.paymentStatus === 'Pending') ||
-      (filterStatus === 'failed' && donation.paymentStatus === 'Failed');
+  const handleApplyFilters = () => {
+    setSearchTerm(searchInput.trim());
+    setPage(1);
+  };
 
-    return matchesSearch && matchesStatus;
-  });
+  const handleStatusChange = (value) => {
+    setFilterStatus(value);
+    setPage(1);
+  };
 
-  // Calculate statistics
-  const totalDonations = donations.length;
-  const totalAmount = donations.reduce((sum, d) => sum + Number(d.amount || 0), 0);
-  const successDonations = donations.filter((d) => d.paymentStatus === 'Success').length;
-  const successAmount = donations
-    .filter((d) => d.paymentStatus === 'Success')
-    .reduce((sum, d) => sum + Number(d.amount || 0), 0);
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setPage(1);
+  };
 
   if (loading) {
     return (
@@ -94,7 +115,7 @@ const DonationsPage = () => {
           <div className="card bg-primary text-white">
             <div className="card-body">
               <h6 className="card-subtitle mb-2">Total Donations</h6>
-              <h3 className="card-title">{totalDonations}</h3>
+              <h3 className="card-title">{summary.totalDonations}</h3>
             </div>
           </div>
         </div>
@@ -102,7 +123,7 @@ const DonationsPage = () => {
           <div className="card bg-success text-white">
             <div className="card-body">
               <h6 className="card-subtitle mb-2">Successful</h6>
-              <h3 className="card-title">{successDonations}</h3>
+              <h3 className="card-title">{summary.successDonations}</h3>
             </div>
           </div>
         </div>
@@ -110,7 +131,7 @@ const DonationsPage = () => {
           <div className="card bg-info text-white">
             <div className="card-body">
               <h6 className="card-subtitle mb-2">Total Amount</h6>
-              <h3 className="card-title">{formatCurrency(totalAmount)}</h3>
+              <h3 className="card-title">{formatCurrency(summary.totalAmount)}</h3>
             </div>
           </div>
         </div>
@@ -118,7 +139,7 @@ const DonationsPage = () => {
           <div className="card bg-warning text-dark">
             <div className="card-body">
               <h6 className="card-subtitle mb-2">Success Amount</h6>
-              <h3 className="card-title">{formatCurrency(successAmount)}</h3>
+              <h3 className="card-title">{formatCurrency(summary.successAmount)}</h3>
             </div>
           </div>
         </div>
@@ -127,21 +148,27 @@ const DonationsPage = () => {
       {/* Search and Filter */}
       <div className="card mb-4">
         <div className="card-body">
-          <div className="row g-3">
-            <div className="col-md-6">
+          <div className="row g-3 align-items-center">
+            <div className="col-lg-6 col-md-12">
               <input
                 type="text"
                 className="form-control"
                 placeholder="Search by donor name, email, cause, or transaction ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleApplyFilters();
+                  }
+                }}
               />
             </div>
-            <div className="col-md-3">
+            <div className="col-lg-3 col-md-6">
               <select
                 className="form-select"
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                onChange={(e) => handleStatusChange(e.target.value)}
               >
                 <option value="all">All Status</option>
                 <option value="success">Success</option>
@@ -149,8 +176,22 @@ const DonationsPage = () => {
                 <option value="failed">Failed</option>
               </select>
             </div>
-            <div className="col-md-3 text-end">
-              <button className="btn btn-primary" onClick={loadDonations}>
+            <div className="col-lg-3 col-md-6 d-flex flex-wrap gap-2 justify-content-lg-end">
+              <button
+                className="btn btn-outline-secondary btn-sm px-3"
+                onClick={() => {
+                  setSearchInput('');
+                  setSearchTerm('');
+                  setFilterStatus('all');
+                  setPage(1);
+                }}
+              >
+                <i className="fas fa-eraser me-2"></i>Clear
+              </button>
+              <button className="btn btn-primary btn-sm px-3" onClick={handleApplyFilters}>
+                <i className="fas fa-search me-2"></i>Apply
+              </button>
+              <button className="btn btn-primary btn-sm px-3" onClick={loadDonations}>
                 <i className="fas fa-sync-alt me-2"></i>Refresh
               </button>
             </div>
@@ -178,14 +219,14 @@ const DonationsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredDonations.length === 0 ? (
+                {donations.length === 0 ? (
                   <tr>
                     <td colSpan="10" className="text-center py-4">
                       No donations found
                     </td>
                   </tr>
                 ) : (
-                  filteredDonations.map((donation) => (
+                  donations.map((donation) => (
                     <tr key={donation.id}>
                       <td>{donation.id}</td>
                       <td>
@@ -205,15 +246,7 @@ const DonationsPage = () => {
                         )}
                       </td>
                       <td>
-                        <div
-                          style={{
-                            maxWidth: '200px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                          title={donation.causeName}
-                        >
+                        <div className="text-break" title={donation.causeName}>
                           {donation.causeName}
                         </div>
                       </td>
@@ -256,6 +289,44 @@ const DonationsPage = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
+        <div>
+          <label className="me-2 fw-semibold">Rows per page:</label>
+          <select
+            value={pageSize}
+            onChange={handlePageSizeChange}
+            className="form-select d-inline-block"
+            style={{ width: 'auto' }}
+          >
+            {[10, 20, 50, 100].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="d-flex align-items-center gap-2">
+          <button
+            className="btn btn-outline-secondary"
+            disabled={page === 1}
+            onClick={() => handlePageChange(page - 1)}
+          >
+            Prev
+          </button>
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            className="btn btn-outline-secondary"
+            disabled={page === totalPages}
+            onClick={() => handlePageChange(page + 1)}
+          >
+            Next
+          </button>
         </div>
       </div>
 

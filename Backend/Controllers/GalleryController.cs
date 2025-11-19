@@ -99,5 +99,16 @@ namespace Backend.Controllers
             if (!await _service.DeleteAsync(id)) return NotFound(new { message = "Gallery item not found" });
             return Ok(new { message = "Gallery item deleted successfully" });
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin")]
+        public async Task<IActionResult> GetPaged(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12,
+            [FromQuery] string? search = null)
+        {
+            var result = await _service.GetPagedAsync(page, pageSize, search);
+            return Ok(result);
+        }
     }
 }

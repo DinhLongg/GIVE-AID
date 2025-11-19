@@ -74,12 +74,24 @@ namespace Backend.Controllers
         // --- Donations ---
 
         [HttpGet("donations")]
-        public async Task<IActionResult> GetAllDonations()
+        public async Task<IActionResult> GetAllDonations(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? status = null)
         {
             try
             {
-                var list = await _donationService.GetAllAsync();
-                return Ok(list);
+                var result = await _donationService.GetAdminPagedAsync(page, pageSize, search, status);
+                return Ok(new
+                {
+                    items = result.Data.Items,
+                    page = result.Data.Page,
+                    pageSize = result.Data.PageSize,
+                    totalItems = result.Data.TotalItems,
+                    totalPages = result.Data.TotalPages,
+                    summary = result.Summary
+                });
             }
             catch (Exception ex)
             {

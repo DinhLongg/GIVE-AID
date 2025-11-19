@@ -57,12 +57,22 @@ export const replyQuery = async (id, reply) => {
 };
 
 // ===== DONATIONS =====
-export const getAllDonations = async () => {
+export const getAdminDonations = async ({
+  page = 1,
+  pageSize = 10,
+  search = '',
+  status = 'all',
+} = {}) => {
   try {
-    const response = await api.get('/admin/donations');
+    const response = await api.get('/admin/donations', {
+      params: { page, pageSize, search, status },
+    });
     return { success: true, data: response.data };
   } catch (error) {
-    return { success: false, message: error.response?.data?.message || 'Failed to fetch donations' };
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch donations',
+    };
   }
 };
 
@@ -131,6 +141,20 @@ export const getAllNGOs = async () => {
   }
 };
 
+export const getAdminNGOs = async ({ page = 1, pageSize = 10, search = '' } = {}) => {
+  try {
+    const response = await api.get('/ngo/admin', {
+      params: { page, pageSize, search },
+    });
+    return { success: true, data: response.data };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch NGOs',
+    };
+  }
+};
+
 export const getNGO = async (id) => {
   try {
     const response = await api.get(`/ngo/${id}`);
@@ -180,6 +204,20 @@ export const getAllGallery = async () => {
   }
 };
 
+export const getAdminGallery = async ({ page = 1, pageSize = 12, search = '' } = {}) => {
+  try {
+    const response = await api.get('/gallery/admin', {
+      params: { page, pageSize, search },
+    });
+    return { success: true, data: response.data };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch gallery items',
+    };
+  }
+};
+
 export const createGallery = async (galleryData) => {
   try {
     // If galleryData is FormData (file upload), remove Content-Type header
@@ -216,6 +254,20 @@ export const getAllPartners = async () => {
     return { success: true, data: response.data };
   } catch (error) {
     return { success: false, message: error.response?.data?.message || 'Failed to fetch partners' };
+  }
+};
+
+export const getAdminPartners = async ({ page = 1, pageSize = 12, search = '' } = {}) => {
+  try {
+    const response = await api.get('/partner/admin', {
+      params: { page, pageSize, search },
+    });
+    return { success: true, data: response.data };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch partners',
+    };
   }
 };
 

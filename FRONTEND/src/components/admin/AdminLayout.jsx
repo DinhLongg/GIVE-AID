@@ -93,8 +93,13 @@ const AdminLayout = ({ children }) => {
       <div
         style={{
           marginLeft: sidebarOpen ? '250px' : '70px',
-          width: '100%',
           transition: 'margin-left 0.3s',
+          flex: 1,
+          minWidth: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          overflowX: 'hidden'
         }}
       >
         {/* Top Bar */}
@@ -125,7 +130,7 @@ const AdminLayout = ({ children }) => {
         </nav>
 
         {/* Page Content */}
-        <div style={{ padding: '30px' }}>
+        <div style={{ padding: '30px', minHeight: 'calc(100vh - 70px)', minWidth: 0 }}>
           {children}
         </div>
       </div>

@@ -1,4 +1,5 @@
 ﻿using Backend.Data;
+using Backend.DTOs;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -75,6 +76,40 @@ namespace Backend.Services
             _context.NGOs.Remove(existing);
             await _context.SaveChangesAsync();
             return (true, "NGO deleted successfully");
+        }
+
+        public async Task<PagedResult<NGO>> GetPagedAsync(int page, int pageSize, string? search)
+        {
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize < 1 ? 10 : (pageSize > 100 ? 100 : pageSize);
+
+            var query = _context.NGOs
+                .OrderByDescending(n => n.CreatedAt)
+                .ThenByDescending(n => n.Id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = $"%{search.Trim()}%";
+                query = query.Where(n =>
+                    (n.Name != null && EF.Functions.Like(n.Name, term)) ||
+                    (n.Description != null && EF.Functions.Like(n.Description, term)) ||
+                    (n.Website != null && EF.Functions.Like(n.Website, term)));
+            }
+
+            var totalItems = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<NGO>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems
+            };
         }
     }
 }

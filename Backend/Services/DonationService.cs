@@ -161,6 +161,78 @@ namespace Backend.Services
             return await _context.Donations.Include(d => d.User).FirstOrDefaultAsync(d => d.Id == id);
         }
 
+        public async Task<(PagedResult<Donation> Data, DonationSummaryDto Summary)> GetAdminPagedAsync(
+            int page,
+            int pageSize,
+            string? search,
+            string? status)
+        {
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize < 1 ? 10 : (pageSize > 100 ? 100 : pageSize);
+
+            var listingQuery = _context.Donations
+                .Include(d => d.User)
+                .OrderByDescending(d => d.CreatedAt)
+                .AsQueryable();
+
+            var aggregateQuery = _context.Donations.AsQueryable();
+
+            listingQuery = ApplyFilters(listingQuery, search, status);
+            aggregateQuery = ApplyFilters(aggregateQuery, search, status);
+
+            var totalItems = await aggregateQuery.CountAsync();
+            var items = await listingQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var summary = new DonationSummaryDto
+            {
+                TotalDonations = totalItems,
+                TotalAmount = await aggregateQuery.SumAsync(d => (decimal?)d.Amount) ?? 0m,
+                SuccessDonations = await aggregateQuery.Where(d => d.PaymentStatus == "Success").CountAsync(),
+                SuccessAmount = await aggregateQuery
+                    .Where(d => d.PaymentStatus == "Success")
+                    .SumAsync(d => (decimal?)d.Amount) ?? 0m
+            };
+
+            return (new PagedResult<Donation>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems
+            }, summary);
+        }
+
+        private static IQueryable<Donation> ApplyFilters(
+            IQueryable<Donation> query,
+            string? search,
+            string? status)
+        {
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = $"%{search.Trim()}%";
+                query = query.Where(d =>
+                    (d.DonorName != null && EF.Functions.Like(d.DonorName, term)) ||
+                    (d.DonorEmail != null && EF.Functions.Like(d.DonorEmail, term)) ||
+                    (d.CauseName != null && EF.Functions.Like(d.CauseName, term)) ||
+                    (d.TransactionReference != null && EF.Functions.Like(d.TransactionReference, term)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(status) && !status.Equals("all", StringComparison.OrdinalIgnoreCase))
+            {
+                string normalizedStatus = status.Trim();
+                if (status.Equals("success", StringComparison.OrdinalIgnoreCase)) normalizedStatus = "Success";
+                else if (status.Equals("pending", StringComparison.OrdinalIgnoreCase)) normalizedStatus = "Pending";
+                else if (status.Equals("failed", StringComparison.OrdinalIgnoreCase)) normalizedStatus = "Failed";
+
+                query = query.Where(d => d.PaymentStatus == normalizedStatus);
+            }
+
+            return query;
+        }
+
         /// <summary>
         /// Lấy danh sách donations của một user cụ thể
         /// </summary>

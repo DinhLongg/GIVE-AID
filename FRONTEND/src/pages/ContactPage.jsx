@@ -86,8 +86,9 @@ export default function ContactPage() {
         comprehensiveMessage += `\nPreferred Contact Time: ${formData.preferredContactTime}`;
       }
 
+      const parsedUserId = user?.id ? Number(user.id) : null;
       const queryData = {
-        userId: user?.id || null,
+        userId: Number.isInteger(parsedUserId) ? parsedUserId : null,
         subject: formData.subject,
         message: comprehensiveMessage,
         email: formData.email,
@@ -307,9 +308,13 @@ export default function ContactPage() {
                                             className="form-control" 
                                             placeholder="Brief description of your inquiry" 
                                             required
+                                            maxLength={200}
                                             value={formData.subject}
                                             onChange={handleChange}
                                         />
+                                        <div className="form-text text-muted text-end">
+                                            {formData.subject.length}/200 characters
+                                        </div>
                                     </div>
                                     <div className="col-12 mb-3">
                                         <label htmlFor="message" className="form-label">Message *</label>

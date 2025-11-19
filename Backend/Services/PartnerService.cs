@@ -1,7 +1,9 @@
 ﻿using Backend.Data;
+using Backend.DTOs;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Backend.Services
@@ -43,6 +45,38 @@ namespace Backend.Services
             _context.Partners.Remove(e);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<PagedResult<Partner>> GetPagedAsync(int page, int pageSize, string? search)
+        {
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize < 1 ? 12 : (pageSize > 100 ? 100 : pageSize);
+
+            var query = _context.Partners
+                .OrderByDescending(p => p.Id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = $"%{search.Trim()}%";
+                query = query.Where(p =>
+                    (p.Name != null && EF.Functions.Like(p.Name, term)) ||
+                    (p.Website != null && EF.Functions.Like(p.Website, term)));
+            }
+
+            var totalItems = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<Partner>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems
+            };
         }
     }
 }
