@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useCounter } from "../utilis/useCounter";
 import programService from "../services/programServices";
+import PageBanner from "../components/PageBanner";
 
 export default function HomePage() {
   // Counter animations for statistics
@@ -12,6 +13,11 @@ export default function HomePage() {
 
   const [featuredPrograms, setFeaturedPrograms] = useState([]);
   const [programStats, setProgramStats] = useState({});
+  const featuredProgramImages = [
+    "/images/home-featured-program.jpg",
+    "/images/about-mission-hero.jpg",
+    "/images/NGO.jpg",
+  ];
 
   useEffect(() => {
     const fetchFeaturedPrograms = async () => {
@@ -64,32 +70,80 @@ export default function HomePage() {
       <section className="hero-section">
         <div className="hero-overlay"></div>
         <div className="container">
-          <div className="row align-items-center min-vh-100">
+          <div className="row align-items-center">
             <div className="col-lg-6" data-aos="fade-right">
-              <h1 className="display-4 fw-bold text-white mb-4">
-                Together We Make a Difference
+              <div className="hero-eyebrow">
+                <span className="dot" />
+                Empowering NGOs & Donors
+              </div>
+              <h1 className="hero-heading">
+                Together we make <span>lasting impact</span>
               </h1>
-              <p className="lead text-white mb-4">
-                Give-AID connects non-governmental organizations and
-                compassionate individuals to support charitable activities,
-                education, and community development.
+              <p className="hero-subtitle">
+                Give-AID connects compassionate donors with trusted NGOs,
+                creating transparent and measurable change for communities
+                around the world.
               </p>
-              <div className="hero-buttons">
-                <Link to="/donate" className="btn btn-primary btn-lg me-3">
-                  <i className="fas fa-heart me-2"></i>Donate Now
+
+              <div className="hero-cta">
+                <Link to="/donate" className="btn btn-primary btn-lg">
+                  <i className="fas fa-heart me-2" />
+                  Donate Now
                 </Link>
-                <Link to="/about" className="btn btn-outline-light btn-lg">
-                  <i className="fas fa-info-circle me-2"></i>Learn More
+                <Link to="/programs" className="btn btn-outline-light btn-lg">
+                  Explore Programs
                 </Link>
               </div>
+
+              <div className="hero-stats">
+                <div className="hero-stat-card">
+                  <h4>50K+</h4>
+                  <p>Lives impacted</p>
+                </div>
+                <div className="hero-stat-card">
+                  <h4>$5M+</h4>
+                  <p>Raised for programs</p>
+                </div>
+                <div className="hero-stat-card">
+                  <h4>150+</h4>
+                  <p>Partner NGOs</p>
+                </div>
+              </div>
             </div>
-            <div className="col-lg-6" data-aos="fade-left">
-              <div className="hero-image">
-                <img
-                  src="/images/home-hero-banner.jpg"
-                  alt="Volunteers helping community"
-                  className="img-fluid rounded-3 shadow-lg"
-                />
+
+            <div className="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left">
+              <div className="hero-media">
+                <div className="hero-image-frame">
+                  <img
+                    src="/images/home-hero-banner.jpg"
+                    alt="Volunteers helping community"
+                  />
+                </div>
+                <div className="hero-media-cards">
+                  <div className="hero-info-card">
+                    <div className="card-icon">
+                      <i className="fas fa-hand-holding-heart" />
+                    </div>
+                    <div>
+                      <p className="label">This week</p>
+                      <h5>418 new donations</h5>
+                      <div className="hero-info-progress">
+                        <div className="hero-info-progress-bar" />
+                      </div>
+                      <small>Goal 500</small>
+                    </div>
+                  </div>
+                  <div className="hero-info-card secondary">
+                    <div className="card-icon">
+                      <i className="fas fa-users" />
+                    </div>
+                    <div>
+                      <p className="label">Volunteers active</p>
+                      <h5>1,245 people</h5>
+                      <small>Across 32 cities worldwide</small>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -183,6 +237,11 @@ export default function HomePage() {
                 const progressPercentage = stats?.progressPercentage || 0;
                 const totalDonations = stats?.totalDonations || 0;
                 const goalAmount = stats?.goalAmount;
+                const imageSrc =
+                  program?.imageUrl ||
+                  featuredProgramImages[
+                    index % featuredProgramImages.length
+                  ];
 
                 return (
                   <div
@@ -194,7 +253,7 @@ export default function HomePage() {
                     <div className="cause-card h-100">
                       <div className="cause-image">
                         <img
-                          src="/images/home-featured-program.jpg"
+                          src={imageSrc}
                           alt={program.title || "Program"}
                           className="img-fluid"
                         />
@@ -444,32 +503,26 @@ export default function HomePage() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="py-5 bg-primary text-white">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-6" data-aos="fade-right">
-              <h3 className="fw-bold mb-3">Subscribe to Our Newsletter</h3>
-              <p className="mb-0">
-                Get updates on new programs and our activities.
-              </p>
-            </div>
-            <div className="col-lg-6" data-aos="fade-left">
-              <form className="newsletter-form">
-                <div className="input-group">
-                  <input
-                    type="email"
-                    className="form-control form-control-lg"
-                    placeholder="Enter your email"
-                  />
-                  <button className="btn btn-light btn-lg" type="submit">
-                    <i className="fas fa-paper-plane"></i>
-                  </button>
-                </div>
-              </form>
-            </div>
+      <PageBanner
+        title="Subscribe to Our Newsletter"
+        subtitle="Get updates on new programs and our activities."
+        eyebrowText="Stay Updated"
+        accent="primary"
+        topSpacing={false}
+      >
+        <form className="newsletter-form">
+          <div className="input-group">
+            <input
+              type="email"
+              className="form-control form-control-lg"
+              placeholder="Enter your email"
+            />
+            <button className="btn btn-light btn-lg" type="submit">
+              <i className="fas fa-paper-plane"></i>
+            </button>
           </div>
-        </div>
-      </section>
+        </form>
+      </PageBanner>
     </>
   );
 }

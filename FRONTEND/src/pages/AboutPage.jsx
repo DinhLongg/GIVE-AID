@@ -1,20 +1,16 @@
 import {Link} from 'react-router-dom'
+import PageBanner from "../components/PageBanner";
+
 export default function AboutPage() {
     return (
         <>
              {/* <!-- Hero Section --> */}
-    <section className="py-5 bg-primary text-white" style={{marginTop: '80px'}}>
-        <div className="container">
-            <div className="row align-items-center">
-                <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-                    <h1 className="display-4 fw-bold mb-3">About Give-AID</h1>
-                    <p className="lead mb-0">
-                        We believe that everyone has the right to live a good and meaningful life.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <PageBanner
+        title="About Give-AID"
+        subtitle="We believe that everyone has the right to live a good and meaningful life."
+        eyebrowText="Get to Know Us"
+        accent="lavender"
+    />
 
     {/* <!-- What We Do Section --> */}
     <section id="what-we-do" className="py-5">

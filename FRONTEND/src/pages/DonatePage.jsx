@@ -4,6 +4,8 @@ import donationService from "../services/donationServices";
 import programService from "../services/programServices";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { getProfile } from "../services/profileServices";
+import PageBanner from "../components/PageBanner";
 
 export default function DonatePage() {
   const navigate = useNavigate();
@@ -58,13 +60,41 @@ export default function DonatePage() {
 
   // Auto-fill user info if logged in
   useEffect(() => {
-    if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        fullName: user.fullName || prev.fullName,
-        email: user.email || prev.email,
-      }));
-    }
+    const loadUserProfile = async () => {
+      if (user) {
+        // First, set basic info from AuthContext
+        setFormData((prev) => ({
+          ...prev,
+          fullName: user.fullName || prev.fullName,
+          email: user.email || prev.email,
+        }));
+
+        // Then, try to load full profile for phone and address
+        try {
+          const result = await getProfile();
+          if (result.success && result.profile) {
+            const profile = result.profile;
+            // Combine address fields into a single address string
+            const addressParts = [];
+            if (profile.streetAddress) addressParts.push(profile.streetAddress);
+            if (profile.city) addressParts.push(profile.city);
+            if (profile.country) addressParts.push(profile.country);
+            const fullAddress = addressParts.join(", ");
+
+            setFormData((prev) => ({
+              ...prev,
+              phone: profile.phone || prev.phone,
+              address: fullAddress || prev.address,
+            }));
+          }
+        } catch (error) {
+          // Silently fail - user might not have a profile yet
+          console.log("Profile not found or error loading profile:", error);
+        }
+      }
+    };
+
+    loadUserProfile();
   }, [user]);
 
   const handleChange = (e) => {
@@ -227,24 +257,12 @@ export default function DonatePage() {
   return (
     <>
       {/* Hero Section */}
-      <section
-        className="py-5 bg-primary text-white"
-        style={{ marginTop: "80px" }}
-      >
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-              <h1 className="display-4 fw-bold mb-3">
-                Donate for a Better Future
-              </h1>
-              <p className="lead mb-0">
-                Every donation you make will create a difference in the lives of
-                those in need.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageBanner
+        title="Donate for a Better Future"
+        subtitle="Every donation you make will create a difference in the lives of those in need."
+        eyebrowText="Make an Impact"
+        accent="forest"
+      />
 
       {/* Programs Selection */}
       <section id="categories" className="py-5">

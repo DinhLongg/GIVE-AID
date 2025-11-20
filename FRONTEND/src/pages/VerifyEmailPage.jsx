@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { verifyEmail, resendVerificationEmail } from '../services/authServices';
 import { toast } from 'react-toastify';
+import PageBanner from "../components/PageBanner";
 
 export default function VerifyEmailPage() {
   const navigate = useNavigate();
@@ -184,18 +185,12 @@ export default function VerifyEmailPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-5 bg-primary text-white" style={{ marginTop: '80px' }}>
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-              <h1 className="display-4 fw-bold mb-3">Verify Your Email</h1>
-              <p className="lead mb-0">
-                Please verify your email address to complete your registration
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageBanner
+        title="Verify Your Email"
+        subtitle="Please verify your email address to complete your registration."
+        eyebrowText="Account Security"
+        accent="sunset"
+      />
 
       {/* Verification Content */}
       <section className="py-5">

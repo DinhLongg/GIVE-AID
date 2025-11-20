@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { forgotPassword } from '../services/authServices';
 import { toast } from 'react-toastify';
+import PageBanner from "../components/PageBanner";
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -78,18 +79,12 @@ export default function ForgotPasswordPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-5 bg-primary text-white" style={{ marginTop: '80px' }}>
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-              <h1 className="display-4 fw-bold mb-3">Reset Your Password</h1>
-              <p className="lead mb-0">
-                Enter your email address and we'll send you a link to reset your password.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageBanner
+        title="Reset Your Password"
+        subtitle="Enter your email address and we'll send you a link to reset your password."
+        eyebrowText="Forgot Password"
+        accent="ocean"
+      />
 
       {/* Forgot Password Form */}
       <section className="py-5">

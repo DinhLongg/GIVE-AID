@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import partnerService from '../services/partnerServices';
+import PageBanner from "../components/PageBanner";
 
 export default function PartnersPage() {
   const [partners, setPartners] = useState([]);
@@ -25,18 +26,12 @@ export default function PartnersPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-5 bg-primary text-white" style={{ marginTop: '80px' }}>
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-              <h1 className="display-4 fw-bold mb-3">Our Partners</h1>
-              <p className="lead mb-0">
-                Working together with trusted organizations to create positive change in the community.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageBanner
+        title="Our Partners"
+        subtitle="Working together with trusted organizations to create positive change in the community."
+        eyebrowText="Collaboration"
+        accent="ocean"
+      />
 
       {/* Partners Overview */}
       <section className="py-5">
@@ -240,21 +235,19 @@ export default function PartnersPage() {
       </section>
 
       {/* Become a Partner CTA */}
-      <section className="py-5 bg-primary text-white">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-              <h2 className="fw-bold mb-4">Become a Partner</h2>
-              <p className="lead mb-4">
-                Join us in making a difference. Partner with Give-AID to create lasting positive change in communities.
-              </p>
-              <Link to="/contact" className="btn btn-light btn-lg">
-                <i className="fas fa-envelope me-2"></i>Contact Us for Partnership
-              </Link>
-            </div>
-          </div>
+      <PageBanner
+        title="Become a Partner"
+        subtitle="Join us in making a difference. Partner with Give-AID to create lasting positive change in communities."
+        eyebrowText="Partner With Us"
+        accent="sunset"
+        topSpacing={false}
+      >
+        <div className="d-flex justify-content-center">
+          <Link to="/contact" className="btn btn-light btn-lg">
+            <i className="fas fa-envelope me-2"></i>Contact Us for Partnership
+          </Link>
         </div>
-      </section>
+      </PageBanner>
     </>
   );
 }

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { resendVerificationEmail } from '../services/authServices';
 import { toast } from 'react-toastify';
+import PageBanner from "../components/PageBanner";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -201,18 +202,12 @@ export default function LoginPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-5 bg-primary text-white" style={{ marginTop: '80px' }}>
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-              <h1 className="display-4 fw-bold mb-3">Welcome Back</h1>
-              <p className="lead mb-0">
-                Sign in to your account to continue making a difference.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageBanner
+        title="Welcome Back"
+        subtitle="Sign in to your account to continue making a difference."
+        eyebrowText="Member Login"
+        accent="primary"
+      />
 
       {/* Login Form */}
       <section className="py-5">

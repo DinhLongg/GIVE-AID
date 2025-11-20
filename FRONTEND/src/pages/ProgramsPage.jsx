@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import programService from "../services/programServices";
 import { useAuth } from "../contexts/AuthContext";
+import PageBanner from "../components/PageBanner";
 
 export default function ProgramsPage() {
   const [programs, setPrograms] = useState([]);
@@ -76,12 +77,12 @@ export default function ProgramsPage() {
 
   return (
     <>
-      <section className="py-5 bg-primary text-white" style={{ marginTop: "80px" }}>
-        <div className="container text-center">
-          <h1 className="fw-bold mb-2">Our Programs</h1>
-          <p className="mb-0">Discover current initiatives and join with us.</p>
-        </div>
-      </section>
+      <PageBanner
+        title="Our Programs"
+        subtitle="Discover current initiatives and join with us."
+        eyebrowText="What We Do"
+        accent="ocean"
+      />
 
       <section className="py-5">
         <div className="container">

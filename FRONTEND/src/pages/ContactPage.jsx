@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import contactService from '../services/contactServices';
+import { getProfile } from '../services/profileServices';
+import PageBanner from "../components/PageBanner";
 
 export default function ContactPage() {
   const { user } = useAuth();
@@ -26,14 +28,34 @@ export default function ContactPage() {
     terms: false,
   });
 
-  // Auto-fill email if user is logged in
+  // Auto-fill user info if logged in
   useEffect(() => {
-    if (user?.email) {
-      setFormData((prev) => ({
-        ...prev,
-        email: user.email,
-      }));
-    }
+    const loadUserProfile = async () => {
+      if (user?.email) {
+        // First, set email from AuthContext
+        setFormData((prev) => ({
+          ...prev,
+          email: user.email,
+        }));
+
+        // Then, try to load full profile for phone
+        try {
+          const result = await getProfile();
+          if (result.success && result.profile) {
+            const profile = result.profile;
+            setFormData((prev) => ({
+              ...prev,
+              phone: profile.phone || prev.phone,
+            }));
+          }
+        } catch (error) {
+          // Silently fail - user might not have a profile yet
+          console.log("Profile not found or error loading profile:", error);
+        }
+      }
+    };
+
+    loadUserProfile();
   }, [user]);
 
   const handleChange = (e) => {
@@ -127,20 +149,14 @@ export default function ContactPage() {
   };
 
   return (
-        <>
+    <>
             {/* <!-- Hero Section --> */}
-    <section className="py-5 bg-primary text-white" style={{ marginTop: '80px'}}>
-        <div className="container">
-            <div className="row align-items-center">
-                <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-                    <h1 className="display-4 fw-bold mb-3">Contact Us</h1>
-                    <p className="lead mb-0">
-                        We'd love to hear from you. Get in touch with us for any questions or support.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <PageBanner
+      title="Contact Us"
+      subtitle="We'd love to hear from you. Get in touch with us for any questions or support."
+      eyebrowText="Get in Touch"
+      accent="ocean"
+    />
 
     {/* <!-- Contact Information --> */}
     <section className="py-5">

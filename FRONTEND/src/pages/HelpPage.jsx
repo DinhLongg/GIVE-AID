@@ -1,19 +1,14 @@
+import PageBanner from "../components/PageBanner";
+
 export default function HelpPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-5 bg-primary text-white" style={{ marginTop: '80px' }}>
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-              <h1 className="display-4 fw-bold mb-3">Help Centre</h1>
-              <p className="lead mb-0">
-                Find answers to your questions and get the support you need.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageBanner
+        title="Help Centre"
+        subtitle="Find answers to your questions and get the support you need."
+        eyebrowText="Support"
+      />
 
       {/* Search Section */}
       <section className="py-4 bg-light">

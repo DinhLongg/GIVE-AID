@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
+import PageBanner from "../components/PageBanner";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -277,24 +278,12 @@ export default function RegisterPage() {
   return (
     <>
       {/* Hero Section */}
-      <section
-        className="py-5 bg-primary text-white"
-        style={{ marginTop: "80px" }}
-      >
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center" data-aos="fade-up">
-              <h1 className="display-4 fw-bold mb-3">
-                Join Give-AID Community
-              </h1>
-              <p className="lead mb-0">
-                Create your account to start making a difference in the
-                community.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageBanner
+        title="Join Give-AID Community"
+        subtitle="Create your account to start making a difference in the community."
+        eyebrowText="Become a Member"
+        accent="ocean"
+      />
 
       {/* Registration Form */}
       <section className="py-5">

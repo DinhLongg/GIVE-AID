@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import ngoService from "../services/ngoServices";
+import PageBanner from "../components/PageBanner";
 
 export default function NGOsPage() {
   const [ngos, setNGOs] = useState([]);
@@ -35,12 +36,12 @@ export default function NGOsPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-5 bg-primary text-white" style={{ marginTop: "80px" }}>
-        <div className="container text-center">
-          <h1 className="fw-bold mb-2">Our Partner NGOs</h1>
-          <p className="mb-0">Discover the organizations working with us to create positive change.</p>
-        </div>
-      </section>
+      <PageBanner
+        title="Our Partner NGOs"
+        subtitle="Discover the organizations working with us to create positive change."
+        eyebrowText="Community Allies"
+        accent="primary"
+      />
 
       {/* NGOs List */}
       <section className="py-5">
